@@ -3,6 +3,7 @@
 
 #include <QTimer>
 #include <iostream>
+#include <stdlib.h>
 #include <QObject>
 #include <QFile>
 using namespace std;
@@ -36,6 +37,7 @@ private:
     void print_gen();
     void update_gen();
     void set_glider();
+    void set_test();
     void read_file();
 
     int live_neighbours;
