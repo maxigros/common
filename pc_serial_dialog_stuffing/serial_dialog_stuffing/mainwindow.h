@@ -28,8 +28,6 @@ private slots:
     void button_send_clicked();
     void button_connect_clicked();
 
-    void on_check_echo_mode_toggled(bool checked);
-
     void on_button_timer_test_clicked();
 
 public slots:

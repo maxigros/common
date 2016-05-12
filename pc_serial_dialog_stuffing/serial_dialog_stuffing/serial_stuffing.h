@@ -6,6 +6,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QVector>
 #include <QTimer>
+#include <ctime>
 
 #define KEY_MSG_FROM_DEV    1
 #define KEY_MSG_FROM_CLI    2
@@ -26,6 +27,7 @@ private:
     QByteArray big_buf;
 
     void extract_packs(QByteArray bb, int* dle_pos);
+    char* make_random_pack(int size);
 
 
 public:
@@ -34,10 +36,10 @@ public:
 
     int packs_sent = 0;
     int packs_received = 0;
-    bool stuffing_mode = false;
     QTimer tim;
     bool timer_test_mode = false;
-    int packsnum = 1000;
+    int packsnum = 100;
+    int pack_size = 10;
     char test_buf[5] = {0x01, 0x7e, 0x02, 0x7d, 0x03};
 
 private slots:

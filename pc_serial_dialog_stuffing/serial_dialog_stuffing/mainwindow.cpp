@@ -78,16 +78,6 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
     }
 }
 
-
-
-void MainWindow::on_check_echo_mode_toggled(bool checked)
-{
-    if (checked)
-        cp9_client->stuffing_mode = true;
-    else
-        cp9_client->stuffing_mode = false;
-}
-
 void MainWindow::on_button_timer_test_clicked()
 {
     if (cp9_client->timer_test_mode)
@@ -104,7 +94,9 @@ void MainWindow::on_button_timer_test_clicked()
     else
     {
         cp9_client->timer_test_mode = true;
-        cp9_client->tim.start(100);
+        cp9_client->tim.start(ui->spinBox->value());
+        cp9_client->packsnum = ui->spinBox_2->value();
+        cp9_client->pack_size = ui->spinBox_3->value();
         ui->statusBar->clearMessage();
     }
 }

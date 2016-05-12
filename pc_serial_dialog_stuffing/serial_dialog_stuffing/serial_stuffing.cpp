@@ -41,13 +41,19 @@ void cp9b_lib::extract_packs(QByteArray bb, int* dle_pos)
     // проверка правильности пришедшего пакета
     if (timer_test_mode)
     {
-        packs_received++;
-        for (int i = 0; i < s; i++)
-            if (buf[i] != test_buf[i])
-            {
-                packs_received--;
-                break;
-            }
+//        packs_received++;
+        char crc = 0;
+        for (int i = 0; i < s - 1; i++)
+            crc = (crc + buf[i]) & 0xFF;
+        if (crc == buf[s - 1])
+            packs_received++;
+
+//        for (int i = 0; i < s; i++)
+//            if (buf[i] != test_buf[i])
+//            {
+//                packs_received--;
+//                break;
+//            }
 
         if (!tim.isActive())
         {
@@ -62,12 +68,30 @@ void cp9b_lib::extract_packs(QByteArray bb, int* dle_pos)
     emit send_to_gui(KEY_MSG_FROM_DEV, 0, buf, s);
     b.clear();
     delete buf;
+
+    // обрезаем обработанные пакеты
+    big_buf.remove(0, dle_pos[1] + 1);
+}
+
+char *cp9b_lib::make_random_pack(int size)
+{
+    char *data = new char[size];
+    srand(time(0));
+    data[size - 1] = 0;
+    for (int i = 0; i < size - 1;i++)
+    {
+        data[i] = rand() % 255;
+        // CRC
+        data[size - 1] = (data[size - 1] + data[i]) & 0xFF;
+    }
+
+    return data;
 }
 
 void cp9b_lib::tim_timeout()
 {
 
-    send_to_COM(test_buf, 5);
+    send_to_COM(make_random_pack(pack_size), pack_size);
 }
 
 void cp9b_lib::connect_to_COM(QString serialport_name)
@@ -103,12 +127,12 @@ void cp9b_lib::read_COM()
 {
     QByteArray buf = serial.readAll();
     big_buf.append(buf);
+//    cout << QString(big_buf.toHex()).toStdString() << endl;
 
     bool got_dle = false;
     int* dle_pos = new int[2];
     int count = 0;
 
-//    cout << QString(big_buf.toHex()).toStdString() << endl;
 
     // убираем "хвост" в начале массива
     if (big_buf[0] != DLE)
@@ -142,16 +166,17 @@ void cp9b_lib::read_COM()
         }
 
     // обрезаем обработанные пакеты
-    big_buf.remove(0, dle_pos[1] + 1);
+//    big_buf.remove(0, dle_pos[1] + 1);
 //    cout << QString(big_buf.toHex()).toStdString() << endl;
 
 //    cout << "count = " << count << endl;
+
     buf.clear();
 }
 
 void cp9b_lib::send_to_COM(char *data, int data_size)
 {
-    char* data_to_send = new char[100];
+    char* data_to_send = new char[pack_size + pack_size / 3];
     data_to_send[0] = DLE;
     int pos = 1;
     for (int i = 0; i < data_size; i++)
