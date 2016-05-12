@@ -3,11 +3,11 @@
 <title>Static Call Graph - [.\Objects\project.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\project.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Wed May 11 23:30:41 2016
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060061: Last Updated: Thu May 12 17:52:12 2016
 <BR><P>
-<H3>Maximum Stack Usage =         76 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =       1020 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-__rt_entry_main &rArr; main &rArr; Init &rArr; USART_Init &rArr; RCC_GetClocksFreq
+USART1_IRQHandler &rArr; pack_tx
 <P>
 <H3>
 Functions with no stack information
@@ -556,7 +556,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32l1xx_md.o(.text)
 </UL>
 <P><STRONG><a name="[37]"></a>USART1_IRQHandler</STRONG> (Thumb, 278 bytes, Stack size 16 bytes, usart1_irq.o(i.USART1_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = USART1_IRQHandler &rArr; pack_tx
+<BR><BR>[Stack]<UL><LI>Max Depth = 1020<LI>Call Chain = USART1_IRQHandler &rArr; pack_tx
 </UL>
 <BR>[Calls]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;unpack_rx
 <LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pack_tx
@@ -639,8 +639,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
 </UL>
 
-<P><STRONG><a name="[64]"></a>pack_tx</STRONG> (Thumb, 158 bytes, Stack size 16 bytes, functions.o(i.pack_tx))
-<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = pack_tx
+<P><STRONG><a name="[64]"></a>pack_tx</STRONG> (Thumb, 168 bytes, Stack size 1004 bytes, functions.o(i.pack_tx))
+<BR><BR>[Stack]<UL><LI>Max Depth = 1004<LI>Call Chain = pack_tx
 </UL>
 <BR>[Calls]<UL><LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Nop
 </UL>

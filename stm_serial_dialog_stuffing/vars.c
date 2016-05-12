@@ -1,7 +1,7 @@
 #include "vars.h"
 
-unsigned char rx_buf[10];
-unsigned char tx_buf[10];
+unsigned char rx_buf[1000];
+unsigned char tx_buf[1000];
 
 int rx_count = 0;
 int tx_count = 0;

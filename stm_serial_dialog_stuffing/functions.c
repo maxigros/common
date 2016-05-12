@@ -115,8 +115,8 @@ void clear_tx_buf()
 
 int pack_tx()
 {
-    unsigned char temp[10];
-    for (int i = 0; i < 10; i++)
+    unsigned char temp[1000];
+    for (int i = 0; i < 1000; i++)
         temp[i] = 0xFF;
         
     for (int i = 0; i < tx_count; i++)

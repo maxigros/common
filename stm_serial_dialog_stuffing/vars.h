@@ -4,8 +4,8 @@
 #include <stm32l1xx_usart.h>
 #include <misc.h>
 
-extern unsigned char rx_buf[10];
-extern unsigned char tx_buf[10];
+extern unsigned char rx_buf[1000];
+extern unsigned char tx_buf[1000];
 extern int rx_count;
 extern int tx_count;
 extern unsigned char previous_byte;
