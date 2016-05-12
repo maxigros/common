@@ -1,0 +1,134 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.17.0.0
+Copyright (C) 2015 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: a a, a, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.17
+Toolchain Path:  C:\Keil_v5\ARM\ARMCC\Bin
+C Compiler:      Armcc.exe V5.06 update 1 (build 61)
+Assembler:       Armasm.exe V5.06 update 1 (build 61)
+Linker/Locator:  ArmLink.exe V5.06 update 1 (build 61)
+Library Manager: ArmAr.exe V5.06 update 1 (build 61)
+Hex Converter:   FromElf.exe V5.06 update 1 (build 61)
+CPU DLL:         SARMCM3.DLL V5.17
+Dialog DLL:      DCM.DLL V1.13.4.0
+Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V2.0.18.0
+Dialog DLL:      TCM.DLL V1.14.6.0
+ 
+<h2>Project:</h2>
+C:\Keil_Projects\stm_serial_dialog_stuffing\serial_dialog_stuffing.uvprojx
+Project File Date:  05/12/2016
+
+<h2>Output:</h2>
+*** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Rebuild target 'Target 1'
+assembling startup_stm32l1xx_md.s...
+compiling misc.c...
+compiling stm32l1xx_adc.c...
+compiling stm32l1xx_aes.c...
+compiling stm32l1xx_aes_util.c...
+compiling stm32l1xx_comp.c...
+compiling stm32l1xx_crc.c...
+compiling stm32l1xx_dac.c...
+compiling stm32l1xx_dbgmcu.c...
+compiling stm32l1xx_dma.c...
+compiling stm32l1xx_exti.c...
+compiling stm32l1xx_flash.c...
+compiling stm32l1xx_fsmc.c...
+compiling stm32l1xx_gpio.c...
+compiling stm32l1xx_i2c.c...
+compiling stm32l1xx_iwdg.c...
+compiling stm32l1xx_lcd.c...
+compiling stm32l1xx_opamp.c...
+compiling stm32l1xx_pwr.c...
+compiling stm32l1xx_rcc.c...
+compiling stm32l1xx_rtc.c...
+compiling stm32l1xx_sdio.c...
+compiling stm32l1xx_spi.c...
+compiling stm32l1xx_syscfg.c...
+compiling stm32l1xx_tim.c...
+compiling stm32l1xx_usart.c...
+compiling stm32l1xx_wwdg.c...
+compiling core_cm3.c...
+compiling system_stm32l1xx.c...
+compiling main.c...
+vars.h(32): warning:  #1-D: last line of file ends without a newline
+  #define CMD_COUNTER_ZERO    0xFF
+vars.h(32): warning:  #1-D: last line of file ends without a newline
+  #define CMD_COUNTER_ZERO    0xFF
+functions.h(9): warning:  #1295-D: Deprecated declaration Init - give arg types
+  void Init();
+functions.h(11): warning:  #1295-D: Deprecated declaration clear_rx_buf - give arg types
+  void clear_rx_buf();
+functions.h(12): warning:  #1295-D: Deprecated declaration clear_tx_buf - give arg types
+  void clear_tx_buf();
+functions.h(15): warning:  #1295-D: Deprecated declaration unpack_rx - give arg types
+  int unpack_rx();
+functions.h(16): warning:  #1295-D: Deprecated declaration pack_tx - give arg types
+  int pack_tx();
+functions.h(18): warning:  #1295-D: Deprecated declaration Nop - give arg types
+  void Nop();
+main.c: 8 warnings, 0 errors
+compiling functions.c...
+vars.h(32): warning:  #1-D: last line of file ends without a newline
+  #define CMD_COUNTER_ZERO    0xFF
+functions.h(9): warning:  #1295-D: Deprecated declaration Init - give arg types
+  void Init();
+functions.h(11): warning:  #1295-D: Deprecated declaration clear_rx_buf - give arg types
+  void clear_rx_buf();
+functions.h(12): warning:  #1295-D: Deprecated declaration clear_tx_buf - give arg types
+  void clear_tx_buf();
+functions.h(15): warning:  #1295-D: Deprecated declaration unpack_rx - give arg types
+  int unpack_rx();
+functions.h(16): warning:  #1295-D: Deprecated declaration pack_tx - give arg types
+  int pack_tx();
+functions.h(18): warning:  #1295-D: Deprecated declaration Nop - give arg types
+  void Nop();
+functions.c(177): warning:  #1-D: last line of file ends without a newline
+  }
+functions.c: 8 warnings, 0 errors
+compiling usart1_irq.c...
+vars.h(32): warning:  #1-D: last line of file ends without a newline
+  #define CMD_COUNTER_ZERO    0xFF
+vars.h(32): warning:  #1-D: last line of file ends without a newline
+  #define CMD_COUNTER_ZERO    0xFF
+functions.h(9): warning:  #1295-D: Deprecated declaration Init - give arg types
+  void Init();
+functions.h(11): warning:  #1295-D: Deprecated declaration clear_rx_buf - give arg types
+  void clear_rx_buf();
+functions.h(12): warning:  #1295-D: Deprecated declaration clear_tx_buf - give arg types
+  void clear_tx_buf();
+functions.h(15): warning:  #1295-D: Deprecated declaration unpack_rx - give arg types
+  int unpack_rx();
+functions.h(16): warning:  #1295-D: Deprecated declaration pack_tx - give arg types
+  int pack_tx();
+functions.h(18): warning:  #1295-D: Deprecated declaration Nop - give arg types
+  void Nop();
+usart1_irq.c(82): warning:  #1-D: last line of file ends without a newline
+  }
+usart1_irq.c: 9 warnings, 0 errors
+compiling vars.c...
+vars.h(32): warning:  #1-D: last line of file ends without a newline
+  #define CMD_COUNTER_ZERO    0xFF
+vars.c(14): warning:  #1-D: last line of file ends without a newline
+  NVIC_InitTypeDef nvic;
+vars.c: 2 warnings, 0 errors
+linking...
+Program Size: Code=2820 RO-data=276 RW-data=52 ZI-data=3652  
+FromELF: creating hex file...
+".\Objects\project.axf" - 0 Error(s), 27 Warning(s).
+
+<h2>Collection of Component include folders:</h2>
+  C:\Keil_Projects\stm_serial_dialog_stuffing\RTE
+  C:\Keil_v5\ARM\PACK\Keil\STM32L1xx_DFP\1.0.2\Device\Include
+
+<h2>Collection of Component Files used:</h2>
+Build Time Elapsed:  00:00:05
+</pre>
+</body>
+</html>
