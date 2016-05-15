@@ -6,7 +6,6 @@
 
 #include "vars.h"
 
-void Init();
 int array_size(unsigned char* ar);
 void clear_rx_buf();
 void clear_tx_buf();

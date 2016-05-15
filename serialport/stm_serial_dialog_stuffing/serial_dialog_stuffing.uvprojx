@@ -178,7 +178,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3>"C:\Keil_Projects\stm_serial_dialog_stuffing\flash.bat" ()</Flash3>
+          <Flash3>"C:\Users\asus\Documents\STM32\projects\serial_dialog_stuffing\flash.bat" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>

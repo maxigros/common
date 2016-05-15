@@ -31,21 +31,23 @@ void USART1_IRQHandler()
 //                    tx_count = rx_count;
     
                     // обработка команды
-                    if (rx_count == 1)
+                    if (rx_count == 2)
                     {
+                        pack_correct = 1;
                         switch (rx_buf[0])
                         {
                             case CMD_HELLO:
-                                tx_count += 1;
+                                //tx_count += 1;
                                 for (int i = 1; i < tx_count - 1; i++)
                                     tx_buf[i] = 0xEE;
                                 break;
                             case CMD_COUNTER:
-                                tx_count += 1;
-                                tx_buf[0] = package_counter & 0xFF;
-                                tx_buf[1] = (package_counter >> 8) & 0xFF;
+                                //tx_count += 1;
+                                tx_buf[1] = package_counter & 0xFF;
+                                tx_buf[0] = (package_counter >> 8) & 0xFF;
                                 break;
                             case CMD_COUNTER_ZERO:
+                                tx_count--;
                                 package_counter = 0;
                                 tx_buf[0] = CMD_COUNTER_ZERO;
                                 break;
@@ -54,7 +56,15 @@ void USART1_IRQHandler()
                     // обычный пакет данных
                     else
                     {
-                        package_counter++;
+                        char crc = rx_buf[0];
+                        int s = tx_count;
+                        for (int i = 1; i < s - 1; i++)
+                            crc = crc ^ rx_buf[i];
+                        if (crc == rx_buf[s - 1])
+                            pack_correct = 1;
+                            Nop();
+                        if (pack_correct)
+                            package_counter++;
                         //reverse(rx_buf, array_size(rx_buf));
                         
                         for (int i = 0; i < tx_count; i++)
@@ -63,12 +73,16 @@ void USART1_IRQHandler()
                     
                     //tx_buf[0] = DLE;
                     //tx_buf[tx_count - 1] = DLE;
-                    int y = pack_tx();
-                    //Send_USART1(tx_buf, tx_count);
-                    Send_USART1(tx_buf, y);
+                    if (pack_correct)
+                    {
+                        int y = pack_tx();
+                        //Send_USART1(tx_buf, tx_count);
+                        Send_USART1(tx_buf, y);
+                    }
                     flag_got_dle = 0;
                     rx_count = 0;
                     tx_count = 0;
+                    pack_correct = 0;
                     clear_rx_buf();
                     clear_tx_buf();
                 }

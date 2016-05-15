@@ -34,7 +34,8 @@ void serial_stuffing::extract_packs(QByteArray bb, int* dle_pos)
             b.remove(i, 1);
         }
 
-    char* buf = new char[50];
+    char* buf = new char[b.size()];
+//    char* buf = new char[50];
     memcpy(buf, b.data(), b.count());
     int s = b.count();
 
@@ -44,7 +45,7 @@ void serial_stuffing::extract_packs(QByteArray bb, int* dle_pos)
 //        packs_received++;
         char crc = 0;
         for (int i = 0; i < s - 1; i++)
-            crc = (crc + buf[i]) & 0xFF;
+            crc ^= buf[i];
         if (crc == buf[s - 1])
             packs_received++;
 
@@ -55,17 +56,34 @@ void serial_stuffing::extract_packs(QByteArray bb, int* dle_pos)
 //                break;
 //            }
 
+        // в статусбар
+        int n[2];
+        n[0] = packs_sent;
+        n[1] = packs_received;
+        emit send_to_gui(KEY_MSG_PACKSNUM,
+                         0,
+                         0,
+                         0,
+                         n,
+                         2);
+
+
         if (!tim.isActive())
         {
             timer_test_mode = false;
-            emit send_to_gui(KEY_MSG_PACKSNUM,
-                             QString("%1 packages sent").arg(packs_sent),
+            int n[2];
+            n[0] = packs_sent;
+            n[1] = packs_received;
+            emit send_to_gui(KEY_MSG_PACKSNUM_END,
                              0,
-                             packs_received);
+                             0,
+                             0,
+                             n,
+                             2);
         }
     }
 
-    emit send_to_gui(KEY_MSG_FROM_DEV, 0, buf, s);
+    emit send_to_gui(KEY_MSG_FROM_DEV, 0, buf, s, 0, 0);
     b.clear();
     delete buf;
 
@@ -77,12 +95,12 @@ char *serial_stuffing::make_random_pack(int size)
 {
     char *data = new char[size];
     srand(time(0));
-    data[size - 1] = 0;
-    for (int i = 0; i < size - 1;i++)
+//    data[size - 1] = 0;
+    for (int i = 0; i < size;i++)
     {
         data[i] = rand() % 255;
         // CRC
-        data[size - 1] = (data[size - 1] + data[i]) & 0xFF;
+//        data[size - 1] ^= data[i];
     }
 
     return data;
@@ -106,8 +124,10 @@ void serial_stuffing::connect_to_COM(QString serialport_name)
     if (serial.open(QSerialPort::ReadWrite))
     {
         emit send_to_gui(KEY_MSG_FROM_CLI,
-                         QString("Port %1 is opened")
+                         QString("Port %1 is opened (Stuffing mode)")
                                     .arg(serialport_name),
+                         0,
+                         0,
                          0,
                          0);
     }
@@ -115,9 +135,11 @@ void serial_stuffing::connect_to_COM(QString serialport_name)
     {
         QString str = serial.errorString();
         emit send_to_gui(KEY_MSG_FROM_CLI,
-                         QString("Error at port %1 : %2")
+                         QString("Error at port %1 : %2 (Stuffing mode)")
                                     .arg(serialport_name)
                                     .arg(str),
+                         0,
+                         0,
                          0,
                          0);
     }
@@ -165,47 +187,57 @@ void serial_stuffing::read_COM()
             }
         }
 
-    // обрезаем обработанные пакеты
-//    big_buf.remove(0, dle_pos[1] + 1);
-//    cout << QString(big_buf.toHex()).toStdString() << endl;
 
-//    cout << "count = " << count << endl;
 
     buf.clear();
 }
 
 void serial_stuffing::send_to_COM(char *data, int data_size)
 {
-    char* data_to_send = new char[pack_size + pack_size / 3];
+    int t_size = data_size + 1;
+    char *t = new char[t_size];
+    for (int i = 0; i < data_size; i++)
+        t[i] = data[i];
+
+    // CRC
+    char crc = t[0];
+    for (int i = 1; i < t_size - 1; i++)
+        crc ^= t[i];
+    t[t_size - 1] = crc;
+
+
+    char* data_to_send = new char[pack_size + pack_size / 3 + 1];
     data_to_send[0] = DLE;
     int pos = 1;
-    for (int i = 0; i < data_size; i++)
+    for (int i = 0; i < t_size; i++)
     {
-        if (data[i] == ESC || data[i] == DLE)
+        if (t[i] == ESC || t[i] == DLE)
         {
             data_to_send[pos] = ESC;
             pos++;
             // инвертирование 5 бита
-            if (data[i] & (1 << 5))  // если 5 бит ненулевой
-                data_to_send[pos] = data[i] & (~(1 << 5));
+            if (t[i] & (1 << 5))  // если 5 бит ненулевой
+                data_to_send[pos] = t[i] & (~(1 << 5));
             else
-                data_to_send[pos] = data[i] | (1 << 5);
+                data_to_send[pos] = t[i] | (1 << 5);
         }
         else
-            data_to_send[pos] = data[i];
+            data_to_send[pos] = t[i];
         pos++;
     }
     data_to_send[pos] = DLE;
+    delete t;
 
     // check**************************************************************************
-//    QString str;
-//    for(int a = 0; a < pos + 1; a++)
-//    {
-//        str += QString("%1 ").arg((unsigned char)data_to_send[a], 2, 16, QChar('0'));
-//    }
+    QString str;
+    for(int a = 0; a < pos + 1; a++)
+    {
+        str += QString("%1 ").arg((unsigned char)data_to_send[a], 2, 16, QChar('0'));
+    }
+    emit send_to_gui(KEY_MSG_FROM_CLI, str, 0, 0, 0, 0);
 //    cout << str.toStdString() << "   " << endl;
     // *******************************************************************************
-
+    delete data_to_send;
 
     serial.write((const char*)data_to_send, pos + 1);
 
@@ -213,7 +245,9 @@ void serial_stuffing::send_to_COM(char *data, int data_size)
     {
         packs_sent++;
         if (packs_sent == packsnum)
+        {
             tim.stop();
+        }
     }
 }
 

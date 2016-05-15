@@ -8,12 +8,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     stuffing_client = new serial_stuffing();
     prefix_client = new serial_prefix();
+    ui->groupBox_4->setEnabled(false);
+    ui->text_log->append("Stuffing mode is on");
 
     foreach (const QSerialPortInfo &serialPortInfo, QSerialPortInfo::availablePorts())
         ui->comboBox_COM->addItem(serialPortInfo.portName());
 
-    connect(stuffing_client, SIGNAL(send_to_gui(int,QString,char*,int)), this, SLOT(receive_from_cli(int,QString,char*,int)));
-    connect(prefix_client, SIGNAL(send_to_gui(int,QString,char*,int)), this, SLOT(receive_from_cli(int,QString,char*,int)));
+    connect(stuffing_client, SIGNAL(send_to_gui(int,QString,char*,int,int*,int)), this, SLOT(receive_from_cli(int,QString,char*,int,int*,int)));
+    connect(prefix_client, SIGNAL(send_to_gui(int,QString,char*,int,int*,int)), this, SLOT(receive_from_cli(int,QString,char*,int,int*,int)));
     connect(ui->button_connect, SIGNAL(clicked(bool)), this, SLOT(button_connect_clicked()));
     connect(ui->button_send, SIGNAL(clicked(bool)), this, SLOT(button_send_clicked()));
 }
@@ -39,10 +41,25 @@ void MainWindow::button_send_clicked()
     }
 
     if (stuffing_mode)
+    {
+        if (!stuffing_client->serial.isOpen())
+        {
+            ui->text_log->append("Serialport not open");
+            return;
+        }
         stuffing_client->send_to_COM(ar, msg_list.size());
+    }
 
     if (prefix_mode)
+    {
+        if (!prefix_client->serial.isOpen())
+        {
+            ui->text_log->append("Serialport not open");
+            return;
+        }
+        prefix_client->prefix_size = ui->spinBox_4->value();
         prefix_client->send_to_COM(ar, msg_list.size());
+    }
 
     QString str;
     for(int a = 0; a < msg_list.size(); a++)
@@ -50,7 +67,7 @@ void MainWindow::button_send_clicked()
         str += QString("%1 ").arg((unsigned char)ar[a], 2, 16, QChar('0'));
     }
 
-    ui->text_log->append(">>>  OUT  >>>  : " + str);
+//    ui->text_log->append(">>>  OUT  >>>  : " + str);
 }
 
 void MainWindow::button_connect_clicked()
@@ -68,9 +85,10 @@ void MainWindow::button_connect_clicked()
             stuffing_client->serial.close();
         prefix_client->connect_to_COM(ui->comboBox_COM->currentText());
     }
+
 }
 
-void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_size)
+void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_size, int* nums, int nums_size)
 {
     if (stuffing_mode)
         switch (key)
@@ -79,6 +97,12 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
             ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
                                             .arg(stuffing_client->packs_sent)
                                             .arg(stuffing_client->packs_received),
+                                       0);
+            break;
+        case KEY_MSG_PACKSNUM_END:
+            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
+                                            .arg(nums[0])
+                                            .arg(nums[1]),
                                        0);
             stuffing_client->packs_sent = 0;
             stuffing_client->packs_received = 0;
@@ -104,6 +128,12 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
                                             .arg(stuffing_client->packs_sent)
                                             .arg(stuffing_client->packs_received),
                                        0);
+            break;
+        case KEY_MSG_PACKSNUM_END:
+            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
+                                            .arg(nums[0])
+                                            .arg(nums[1]),
+                                       0);
             stuffing_client->packs_sent = 0;
             stuffing_client->packs_received = 0;
             break;
@@ -119,28 +149,56 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
             ui->text_log->append("<<< IN <<< : " + str);
             break;
         }
+
 }
 
 void MainWindow::on_button_timer_test_clicked()
 {
-    if (stuffing_client->timer_test_mode)
+    if (stuffing_mode)
     {
-        stuffing_client->timer_test_mode = false;
-        ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
-                                        .arg(stuffing_client->packs_sent)
-                                        .arg(stuffing_client->packs_received),
-                                   0);
-        stuffing_client->packs_sent = 0;
-        stuffing_client->packs_received = 0;
-        stuffing_client->tim.stop();
+        if (stuffing_client->timer_test_mode)
+        {
+            stuffing_client->timer_test_mode = false;
+            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
+                                            .arg(stuffing_client->packs_sent)
+                                            .arg(stuffing_client->packs_received),
+                                       0);
+            stuffing_client->packs_sent = 0;
+            stuffing_client->packs_received = 0;
+            stuffing_client->tim.stop();
+        }
+        else
+        {
+            stuffing_client->timer_test_mode = true;
+            stuffing_client->tim.start(ui->spinBox->value());
+            stuffing_client->packsnum = ui->spinBox_2->value();
+            stuffing_client->pack_size = ui->spinBox_3->value();
+            ui->statusBar->clearMessage();
+        }
     }
-    else
+
+    if (prefix_mode)
     {
-        stuffing_client->timer_test_mode = true;
-        stuffing_client->tim.start(ui->spinBox->value());
-        stuffing_client->packsnum = ui->spinBox_2->value();
-        stuffing_client->pack_size = ui->spinBox_3->value();
-        ui->statusBar->clearMessage();
+        if (prefix_client->timer_test_mode)
+        {
+            prefix_client->timer_test_mode = false;
+            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
+                                            .arg(prefix_client->packs_sent)
+                                            .arg(prefix_client->packs_received),
+                                       0);
+            prefix_client->packs_sent = 0;
+            prefix_client->packs_received = 0;
+            prefix_client->tim.stop();
+        }
+        else
+        {
+            prefix_client->timer_test_mode = true;
+            prefix_client->tim.start(ui->spinBox->value());
+            prefix_client->packsnum = ui->spinBox_2->value();
+            prefix_client->pack_size = ui->spinBox_3->value();
+            prefix_client->prefix_size = ui->spinBox_4->value();
+            ui->statusBar->clearMessage();
+        }
     }
 }
 
@@ -149,12 +207,16 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
     switch (index)
     {
     case 0: // stuffing
+        ui->groupBox_4->setEnabled(false);
         stuffing_mode = true;
         prefix_mode = false;
+        ui->text_log->append("Stuffing mode is on");
         break;
     case 1: // prefix
+        ui->groupBox_4->setEnabled(true);
         stuffing_mode = false;
         prefix_mode = true;
+        ui->text_log->append("Prefix mode is on");
         break;
     }
 }

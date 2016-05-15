@@ -104,19 +104,19 @@ int array_size(unsigned char* ar)
 
 void clear_rx_buf()
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < BUF_SIZZE; i++)
                 rx_buf[i] = 0x00;
 }
 void clear_tx_buf()
 {
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < BUF_SIZZE; i++)
                 tx_buf[i] = 0x00;
 }
 
 int pack_tx()
 {
-    unsigned char temp[1000];
-    for (int i = 0; i < 1000; i++)
+    unsigned char temp[BUF_SIZZE];
+    for (int i = 0; i < BUF_SIZZE; i++)
         temp[i] = 0xFF;
         
     for (int i = 0; i < tx_count; i++)
@@ -148,7 +148,8 @@ int pack_tx()
 
 int unpack_rx()
 {
-    int s = array_size(rx_buf);
+    int s = rx_count;
+    Nop();
     for (int i = 0; i < s; i++)
         if (rx_buf[i] == ESC)
         {
@@ -161,6 +162,7 @@ int unpack_rx()
             // смещение массива    
             for (int j = i; j < s - 1; j++)
                 rx_buf[j] = rx_buf[j + 1];
+            rx_buf[s - 1] = 0;
             s--;    
         }
     return s;    
