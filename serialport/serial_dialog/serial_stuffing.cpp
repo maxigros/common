@@ -75,7 +75,7 @@ void serial_stuffing::extract_packs(QByteArray bb, int* dle_pos)
             n[0] = packs_sent;
             n[1] = packs_received;
             emit send_to_gui(KEY_MSG_PACKSNUM_END,
-                             0,
+                             QString("Timetest off"),
                              0,
                              0,
                              n,
@@ -244,6 +244,18 @@ void serial_stuffing::send_to_COM(char *data, int data_size)
     if (timer_test_mode)
     {
         packs_sent++;
+
+        // в статусбар
+        int n[2];
+        n[0] = packs_sent;
+        n[1] = packs_received;
+        emit send_to_gui(KEY_MSG_PACKSNUM,
+                         0,
+                         0,
+                         0,
+                         n,
+                         2);
+
         if (packs_sent == packsnum)
         {
             tim.stop();

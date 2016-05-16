@@ -33,7 +33,7 @@ public:
     QTimer tim;
     bool timer_test_mode = false;
     int packsnum = 100;
-    int pack_size = 10;
+    int pack_size = 1000;
     char test_buf[5] = {0x01, 0x7e, 0x02, 0x7d, 0x03};
 
     int packs_sent = 0;

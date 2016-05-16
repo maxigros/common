@@ -59,7 +59,7 @@ void serial_prefix::extract_packs(QByteArray bb, int prefix_pos)
                 n[0] = packs_sent;
                 n[1] = packs_received;
                 emit send_to_gui(KEY_MSG_PACKSNUM_END,
-                                 0,
+                                 QString("Timetest off"),
                                  0,
                                  0,
                                  n,

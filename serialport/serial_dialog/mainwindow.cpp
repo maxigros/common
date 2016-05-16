@@ -104,6 +104,7 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
                                             .arg(nums[0])
                                             .arg(nums[1]),
                                        0);
+            ui->text_log->append(msg);
             stuffing_client->packs_sent = 0;
             stuffing_client->packs_received = 0;
             break;
@@ -134,6 +135,7 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
                                             .arg(nums[0])
                                             .arg(nums[1]),
                                        0);
+            ui->text_log->append(msg);
             prefix_client->packs_sent = 0;
             prefix_client->packs_received = 0;
             break;
@@ -156,41 +158,20 @@ void MainWindow::on_button_timer_test_clicked()
 {
     if (stuffing_mode)
     {
-        if (stuffing_client->timer_test_mode)
-        {
-            stuffing_client->timer_test_mode = false;
-            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
-                                            .arg(stuffing_client->packs_sent)
-                                            .arg(stuffing_client->packs_received),
-                                       0);
-            stuffing_client->packs_sent = 0;
-            stuffing_client->packs_received = 0;
-            stuffing_client->tim.stop();
-        }
-        else
+        if (!stuffing_client->timer_test_mode)
         {
             stuffing_client->timer_test_mode = true;
             stuffing_client->tim.start(ui->spinBox->value());
             stuffing_client->packsnum = ui->spinBox_2->value();
             stuffing_client->pack_size = ui->spinBox_3->value();
             ui->statusBar->clearMessage();
+            ui->text_log->append(QString("Timetest on"));
         }
     }
 
     if (prefix_mode)
     {
-        if (prefix_client->timer_test_mode)
-        {
-            prefix_client->timer_test_mode = false;
-            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
-                                            .arg(prefix_client->packs_sent)
-                                            .arg(prefix_client->packs_received),
-                                       0);
-            prefix_client->packs_sent = 0;
-            prefix_client->packs_received = 0;
-            prefix_client->tim.stop();
-        }
-        else
+        if (!prefix_client->timer_test_mode)
         {
             prefix_client->timer_test_mode = true;
             prefix_client->tim.start(ui->spinBox->value());
@@ -198,6 +179,7 @@ void MainWindow::on_button_timer_test_clicked()
             prefix_client->pack_size = ui->spinBox_3->value();
             prefix_client->prefix_size = ui->spinBox_4->value();
             ui->statusBar->clearMessage();
+            ui->text_log->append(QString("Timetest on"));
         }
     }
 }
@@ -218,5 +200,40 @@ void MainWindow::on_comboBox_currentIndexChanged(int index)
         prefix_mode = true;
         ui->text_log->append("Prefix mode is on");
         break;
+    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    if (stuffing_mode)
+    {
+        if (stuffing_client->timer_test_mode)
+        {
+            stuffing_client->timer_test_mode = false;
+            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
+                                            .arg(stuffing_client->packs_sent)
+                                            .arg(stuffing_client->packs_received),
+                                       0);
+            ui->text_log->append(QString("Timetest off"));
+            stuffing_client->packs_sent = 0;
+            stuffing_client->packs_received = 0;
+            stuffing_client->tim.stop();
+        }
+    }
+
+    if (prefix_mode)
+    {
+        if (prefix_client->timer_test_mode)
+        {
+            prefix_client->timer_test_mode = false;
+            ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
+                                            .arg(prefix_client->packs_sent)
+                                            .arg(prefix_client->packs_received),
+                                       0);
+            ui->text_log->append(QString("Timetest off"));
+            prefix_client->packs_sent = 0;
+            prefix_client->packs_received = 0;
+            prefix_client->tim.stop();
+        }
     }
 }

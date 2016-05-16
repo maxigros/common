@@ -37,6 +37,8 @@ private slots:
 
     void on_comboBox_currentIndexChanged(int index);
 
+    void on_pushButton_clicked();
+
 public slots:
     void receive_from_cli(int key, QString msg, char *data, int data_size, int* nums, int nums_size);
 
