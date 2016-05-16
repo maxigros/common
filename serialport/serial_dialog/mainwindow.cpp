@@ -125,8 +125,8 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
         {
         case KEY_MSG_PACKSNUM:
             ui->statusBar->showMessage(QString("%1 packages sent, %2 packages received.")
-                                            .arg(stuffing_client->packs_sent)
-                                            .arg(stuffing_client->packs_received),
+                                            .arg(prefix_client->packs_sent)
+                                            .arg(prefix_client->packs_received),
                                        0);
             break;
         case KEY_MSG_PACKSNUM_END:
@@ -134,8 +134,8 @@ void MainWindow::receive_from_cli(int key, QString msg, char *data, int data_siz
                                             .arg(nums[0])
                                             .arg(nums[1]),
                                        0);
-            stuffing_client->packs_sent = 0;
-            stuffing_client->packs_received = 0;
+            prefix_client->packs_sent = 0;
+            prefix_client->packs_received = 0;
             break;
         case KEY_MSG_FROM_CLI:
             ui->text_log->append("### : " + msg);
