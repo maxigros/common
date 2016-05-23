@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"C:\Program Files\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "C:\Documents and Settings\m\Мои документы\Work\IAR_Projects\Project_2\settings\shab.Debug.general.xcl" --backend -f "C:\Documents and Settings\m\Мои документы\Work\IAR_Projects\Project_2\settings\shab.Debug.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "C:\Users\asus\Documents\STM32\IAR_Projects\Project_2\settings\shab.Debug.general.xcl" --backend -f "C:\Users\asus\Documents\STM32\IAR_Projects\Project_2\settings\shab.Debug.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"C:\Program Files\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "C:\Documents and Settings\m\Мои документы\Work\IAR_Projects\Project_2\settings\shab.Debug.general.xcl" "--debug_file=%~1" --backend -f "C:\Documents and Settings\m\Мои документы\Work\IAR_Projects\Project_2\settings\shab.Debug.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\common\bin\cspybat" -f "C:\Users\asus\Documents\STM32\IAR_Projects\Project_2\settings\shab.Debug.general.xcl" "--debug_file=%~1" --backend -f "C:\Users\asus\Documents\STM32\IAR_Projects\Project_2\settings\shab.Debug.driver.xcl" 
 
 @echo off 
 :end

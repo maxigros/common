@@ -48,8 +48,8 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define LED2    GPIO_PIN_6
-#define LED1    GPIO_PIN_7
+#define LED_BLUE    GPIO_PIN_6
+#define LED_GREEN    GPIO_PIN_7
 #define TXPIN   GPIO_PIN_9
 #define RXPIN   GPIO_PIN_10
 #define BAUDRATE    115200
@@ -70,6 +70,7 @@ void Init_Periph(void);
   */
 int main(void)
 {
+  printf("main start\n");
 
   /* STM32L1xx HAL library initialization:
        - Configure the Flash prefetch
@@ -91,7 +92,17 @@ int main(void)
      */
   
   Init_Periph();
-  HAL_GPIO_WritePin(GPIOB, LED1, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, LED_GREEN, GPIO_PIN_SET);
+  char tx_buf[10];
+  char rx_buf[50];
+  for (int i = 0; i < 10; i++)
+    tx_buf[i] = i;
+  
+//  HAL_UART_Transmit(&uart1, tx_buf, 10, 1);
+//  HAL_UART_Receive(&uart1, tx_buf, 10, 1);
+
+//  HAL_UART_Transmit_IT(&uart1, (uint8_t*)tx_buf, 10);
+  HAL_UART_Receive_IT(&uart1, (uint8_t*)rx_buf, 1);
 
   /* Infinite loop */
   while (1)
@@ -182,41 +193,74 @@ void Init_Periph(void)
      GPIO_InitTypeDef LED_Init;
      LED_Init.Mode = GPIO_MODE_OUTPUT_PP;
      LED_Init.Pull = GPIO_NOPULL;
-     LED_Init.Pin = LED1 | LED2;
+     LED_Init.Pin = LED_GREEN | LED_BLUE;
      LED_Init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
      HAL_GPIO_Init(GPIOB, &LED_Init);
      
     /*    USART   */
-     __GPIOA_CLK_ENABLE();
-     // PINs
-     GPIO_InitTypeDef UART_Pins_Init;
-     UART_Pins_Init.Mode = GPIO_MODE_AF_PP;
-     UART_Pins_Init.Pull = GPIO_NOPULL;
-     UART_Pins_Init.Pin = TXPIN | RXPIN;
-     UART_Pins_Init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-     UART_Pins_Init.Alternate = GPIO_AF7_USART1;;
-     HAL_GPIO_Init(GPIOA, &UART_Pins_Init);
-     // UART
-     __USART1_CLK_ENABLE();
-     
      uart1.Instance = USART1;
      uart1.Init.BaudRate = BAUDRATE;
      uart1.Init.WordLength = UART_WORDLENGTH_8B;
      uart1.Init.StopBits = UART_STOPBITS_1;
      uart1.Init.Parity = UART_PARITY_NONE;
-     uart1.Init.Mode = UART_MODE_TX_RX;
+     uart1.Init.Mode = UART_MODE_TX;
      uart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-//     uart1.Init.OverSampling = UART_OVERSAMPLING_16;
-     HAL_UART_Init(&uart1);
-     
-     /*    IRQ   */
-     HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
-     HAL_NVIC_EnableIRQ( USART1_IRQn );
+     uart1.Init.OverSampling = UART_OVERSAMPLING_16;
+     if (HAL_UART_Init(&uart1) != HAL_OK)
+       printf("usart init error\n");
+     else
+       printf("init_periph\n");
 }
+
+void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+{
+    /*##-1- Enable peripherals and GPIO Clocks #################################*/
+    /* Enable GPIO TX/RX clock */
+    __GPIOA_CLK_ENABLE();
+
+    /* Enable USARTx clock */
+    __USART1_CLK_ENABLE();
+
+    /*##-2- Configure peripheral GPIO ##########################################*/
+    /* UART TX/RX GPIO pin configuration  */
+    GPIO_InitTypeDef UART_Pins_Init;  
+    UART_Pins_Init.Mode = GPIO_MODE_AF_PP;
+    UART_Pins_Init.Pull = GPIO_NOPULL; 
+    UART_Pins_Init.Pin = TXPIN | RXPIN;
+    UART_Pins_Init.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    UART_Pins_Init.Alternate = GPIO_AF7_USART1;;
+    HAL_GPIO_Init(GPIOA, &UART_Pins_Init);
+  
+    /*    IRQ   */
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 1);
+    HAL_NVIC_EnableIRQ( USART1_IRQn );
+    printf("msp_init\n");
+}
+
 
 void USART1_IRQHandler(void)
 {
-  printf("here\n");
+  if (UART_FLAG_TC)
+  {
+    __HAL_UART_CLEAR_FLAG(&uart1, UART_FLAG_TC);
+    printf("tx interrupt\n");
+  }
+  
+  if (UART_FLAG_RXNE)
+  {
+    __HAL_UART_CLEAR_FLAG(&uart1, UART_FLAG_RXNE);
+    printf("rx interrupt\n");
+  }
+}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  UNUSED(huart);
+  printf("rxcplt_interrupt\n");
+}
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+  UNUSED(huart);
+  printf("txcplt_interrupt\n");
 }
 
 #ifdef  USE_FULL_ASSERT
