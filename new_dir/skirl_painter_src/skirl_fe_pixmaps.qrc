@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/buttons">
+        <file>images/trace.gif</file>
+        <file>images/zoom.gif</file>
+        <file>images/trace_active.gif</file>
+        <file>images/zoom_active.gif</file>
+        <file>images/zoom_in.gif</file>
+        <file>images/zoom_out.gif</file>
+        <file>images/pan.gif</file>
+        <file>images/pan_active.gif</file>
+        <file>images/cross.gif</file>
+        <file>images/magnifier.gif</file>
+        <file>images/cross_active.gif</file>
+        <file>images/magnifier_active.gif</file>
+        <file>images/question.gif</file>
+        <file>images/gradient.png</file>
+        <file>images/telemeter.png</file>
+        <file>images/clear.png</file>
+        <file>images/spade.png</file>
+        <file>images/spade_active.png</file>
+        <file>images/startRecord.png</file>
+        <file>images/stopRecord.png</file>
+    </qresource>
+</RCC>
