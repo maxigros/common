@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     QByteArray data = source.readAll();
+    source.close();
     const int source_size = data.size();
     char symbols_array[source_size];
     memcpy(&symbols_array, data.data(), source_size*sizeof(char));
