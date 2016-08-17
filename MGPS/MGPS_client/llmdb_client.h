@@ -3,7 +3,6 @@
 
 #include <QUdpSocket>
 #include <QTimer>
-#include <QString>
 #include "defines.h"
 
 
@@ -15,6 +14,7 @@ public:
 
     void open_socket();
     void close_socket();
+    void cmd_handler(cmd_data data);
 
     QString host_addr;
 
@@ -27,7 +27,7 @@ private:
 
 
 signals:
-    void response(QString msg);
+    void response(int key, QString msg, char *data, int size);
 
 private slots:
 

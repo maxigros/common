@@ -2,6 +2,7 @@
 #define DEFINES_H
 
 #include <QDebug>
+#include <QString>
 
 //***** COMMANDS    *****
 #define CMD_VERSION                         0x01
@@ -22,9 +23,15 @@
 #define CMD_FLASH_SESSION_SIZE              0x0d
 //***********************
 
+//***** KEYS    *****
+#define KEY_STATUS              1
+#define KEY_SESSION_SIZE        2
+#define KEY_FLASH_FREE_SPACE    3
+//*******************
+
 //***** SERVICE COMMANDS    *****
-#define CLIENT_OPEN_SOCKET       1001
-#define CLIENT_CLOSE_SOCKET      1002
+//#define CLIENT_OPEN_SOCKET       1001
+//#define CLIENT_CLOSE_SOCKET      1002
 //*******************************
 
 //***** CONFIG  *****
@@ -48,10 +55,10 @@
 
 typedef struct
 {
-    char dev_addr;
-    char cmd;
-    char* data;
-    int data_size;
-} struct_cmd;
+    unsigned char dev_addr = 0;
+    unsigned char cmd = 0;
+    QString str = 0;
+    unsigned long int num = 0;
+} cmd_data;
 
 #endif // DEFINES_H
