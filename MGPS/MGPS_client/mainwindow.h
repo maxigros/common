@@ -3,13 +3,13 @@
 
 #include <QMainWindow>
 #include "defines.h"
-#include "llmdb_client.h"
+#include "llmdb_client_ext.h"
 
 namespace Ui {
 class MainWindow;
 }
 
-class llmdb_client;
+class llmdb_client_ext;
 
 class MainWindow : public QMainWindow
 {
@@ -21,6 +21,8 @@ public:
 
 private slots:
     void receive_data_from_client(int key, QString msg, char* data, int size);
+
+    void mode_handler(int new_mode);
 
     void on_host_addr_line_returnPressed();
 
@@ -52,7 +54,7 @@ private slots:
 
     void on_button_device_status_clicked();
 
-    void on_button_session_rec_start_clicked();
+    void on_button_sessions_rec_start_clicked();
 
     void on_button_session_size_refresh_clicked();
 
@@ -60,13 +62,18 @@ private slots:
 
     void on_button_flash_download_start_clicked();
 
-    void on_checkBox_contents_toggled(bool checked);
+    void on_pushButton_auto_stop_all_clicked();
+
+    void on_checkBox_sessions_rec_contents_toggled(bool checked);
 
     void on_lineEdit_send_returnPressed();
 
 private:
     Ui::MainWindow *ui;
-    llmdb_client* client;
+    llmdb_client_ext* client;
+
+signals:
+    void mode_changed(int new_mode);
 
 };
 

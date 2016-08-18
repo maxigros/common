@@ -14,10 +14,12 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    llmdb_client.cpp
+    llmdb_client.cpp \
+    llmdb_client_ext.cpp
 
 HEADERS  += mainwindow.h \
     llmdb_client.h \
-    defines.h
+    defines.h \
+    llmdb_client_ext.h
 
 FORMS    += mainwindow.ui

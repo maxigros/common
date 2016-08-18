@@ -27,13 +27,22 @@
 #define KEY_STATUS              1
 #define KEY_SESSION_SIZE        2
 #define KEY_FLASH_FREE_SPACE    3
+#define KEY_MODE_CHANGED        4
+#define KEY_PROGRESS_BAR        5
 //*******************
 
 //***** SERVICE COMMANDS    *****
 #define SERVICE_CMD_MANUAL_DATA            150
-//#define CLIENT_OPEN_SOCKET       151
-//#define CLIENT_CLOSE_SOCKET      152
+//#define CLIENT_OPEN_SOCKET                 151
+//#define CLIENT_CLOSE_SOCKET                152
 //*******************************
+
+//****  MODES   *****
+#define MODE_NONE               10
+#define MODE_SESSIONS_REC       11
+#define MODE_SESSION_DOWNLOAD   12
+#define MODE_FLASH_DOWNLOAD     13
+//*******************
 
 //***** CONFIG  *****
 

@@ -6,9 +6,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    client = new llmdb_client();
+    client = new llmdb_client_ext();
     client->host_addr = ui->host_addr_line->text();
     connect(client, SIGNAL(response(int, QString, char*, int)), this, SLOT(receive_data_from_client(int, QString, char*, int)));
+    connect(this, SIGNAL(mode_changed(int)), this, SLOT(mode_handler(int)));
 }
 
 MainWindow::~MainWindow()
@@ -50,6 +51,42 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
         ui->label_flash_free_space_pages->setText(QString("%1 pages").arg(t / 528));
         break;
     }
+    default:
+        break;
+    }
+}
+
+void MainWindow::mode_handler(int new_mode)
+{
+    switch (new_mode) {
+    case MODE_SESSIONS_REC:
+        ui->groupBox_sessions_rec->setEnabled(false);
+        ui->groupBox_session_download->setEnabled(false);
+        ui->groupBox_flash_download->setEnabled(false);
+        ui->statusBar->showMessage("Sessions Rec Active!", 0);
+        client->initiate_mode(MODE_SESSIONS_REC);
+        break;
+    case MODE_SESSION_DOWNLOAD:
+        ui->groupBox_sessions_rec->setEnabled(false);
+        ui->groupBox_session_download->setEnabled(false);
+        ui->groupBox_flash_download->setEnabled(false);
+        ui->statusBar->showMessage("Session Download Active!", 0);
+        client->initiate_mode(MODE_SESSION_DOWNLOAD);
+        break;
+    case MODE_FLASH_DOWNLOAD:
+        ui->groupBox_sessions_rec->setEnabled(false);
+        ui->groupBox_session_download->setEnabled(false);
+        ui->groupBox_flash_download->setEnabled(false);
+        ui->statusBar->showMessage("Flash Download Active!", 0);
+        client->initiate_mode(MODE_FLASH_DOWNLOAD);
+        break;
+    case MODE_NONE:
+        ui->groupBox_sessions_rec->setEnabled(true);
+        ui->groupBox_session_download->setEnabled(true);
+        ui->groupBox_flash_download->setEnabled(true);
+        ui->statusBar->clearMessage();
+        client->initiate_mode(MODE_NONE);
+        break;
     default:
         break;
     }
@@ -173,9 +210,9 @@ void MainWindow::on_button_device_status_clicked()
     client->cmd_handler(command);
 }
 
-void MainWindow::on_button_session_rec_start_clicked()
+void MainWindow::on_button_sessions_rec_start_clicked()
 {
-
+    mode_changed(MODE_SESSIONS_REC);
 }
 
 void MainWindow::on_button_session_size_refresh_clicked()
@@ -185,17 +222,22 @@ void MainWindow::on_button_session_size_refresh_clicked()
 
 void MainWindow::on_button_session_download_start_clicked()
 {
-
+    mode_changed(MODE_SESSION_DOWNLOAD);
 }
 
 void MainWindow::on_button_flash_download_start_clicked()
 {
+    mode_changed(MODE_FLASH_DOWNLOAD);
+}
+
+void MainWindow::on_checkBox_sessions_rec_contents_toggled(bool checked)
+{
 
 }
 
-void MainWindow::on_checkBox_contents_toggled(bool checked)
+void MainWindow::on_pushButton_auto_stop_all_clicked()
 {
-
+    mode_changed(MODE_NONE);
 }
 
 void MainWindow::on_lineEdit_send_returnPressed()
