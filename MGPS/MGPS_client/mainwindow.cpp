@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete client;
     delete ui;
 }
 
@@ -35,21 +36,17 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
         break;
     }
     case KEY_SESSION_SIZE:{
-        unsigned long int s =   ((int)data[4] << 24) |
-                                ((int)data[3] << 16) |
-                                ((int)data[2] << 8)  |
-                                ((int)data[1]);
-        ui->label_session_size_bytes->setText(QString("%1 bytes").arg(s));
-        ui->label_session_size_blocks->setText(QString("%1 blocks").arg(s / 24));
-        ui->label_session_size_pages->setText(QString("%1 pages").arg(s / 24 / 22));
+        int t;
+        memcpy(&t, data + sizeof(unsigned char), 4*sizeof(unsigned char));
+        ui->label_session_size_bytes->setText(QString("%1 bytes").arg(t));
+        ui->label_session_size_blocks->setText(QString("%1 blocks").arg(t / 24));
+        ui->label_session_size_pages->setText(QString("%1 pages").arg(t / 24 / 22));
         break;
     }
     case KEY_FLASH_FREE_SPACE:{
-        unsigned int t =        ((int)data[4] << 24) |
-                                ((int)data[3] << 16) |
-                                ((int)data[2] << 8)  |
-                                ((int)data[1]);
-        ui->label_flash_free_space_bytes->setText(QString::number(t));
+        int t;
+        memcpy(&t, data + sizeof(unsigned char), 4*sizeof(unsigned char));
+        ui->label_flash_free_space_bytes->setText(QString("%1 bytes").arg(t));
         ui->label_flash_free_space_pages->setText(QString("%1 pages").arg(t / 528));
         break;
     }
@@ -142,7 +139,11 @@ void MainWindow::on_button_session_start_clicked()
 
 void MainWindow::on_button_flash_read_block_clicked()
 {
-
+    cmd_data command;
+    command.dev_addr = ui->device_addr_line->text().toInt();
+    command.cmd = CMD_FLASH_READ_BLOCK;
+    command.num = ui->lineEdit_read_block_number->text().toInt();
+    client->cmd_handler(command);
 }
 
 void MainWindow::on_button_session_size_clicked()
@@ -156,7 +157,12 @@ void MainWindow::on_button_session_size_clicked()
 
 void MainWindow::on_button_session_block_clicked()
 {
-
+    cmd_data command;
+    command.dev_addr = ui->device_addr_line->text().toInt();
+    command.cmd = CMD_FLASH_READ_SESSION_BLOCK;
+    command.str = ui->lineEdit_session_block_name->text();
+    command.num = ui->lineEdit_session_block_number->text().toInt();
+    client->cmd_handler(command);
 }
 
 void MainWindow::on_button_device_status_clicked()
@@ -190,4 +196,14 @@ void MainWindow::on_button_flash_download_start_clicked()
 void MainWindow::on_checkBox_contents_toggled(bool checked)
 {
 
+}
+
+void MainWindow::on_lineEdit_send_returnPressed()
+{
+    cmd_data command;
+    command.dev_addr = ui->device_addr_line->text().toInt();
+    command.cmd = SERVICE_CMD_MANUAL_DATA;
+    command.str = ui->lineEdit_send->text();
+    ui->lineEdit_send->clear();
+    client->cmd_handler(command);
 }

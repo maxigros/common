@@ -5,22 +5,22 @@
 #include <QString>
 
 //***** COMMANDS    *****
-#define CMD_VERSION                         0x01
-#define CMD_ID                              0x06
-#define CMD_SERIAL                          0x07
-#define CMD_STATUS                          0x14
-#define CMD_BINR_START                      0x84
-#define CMD_BINR_STOP                       0x85
-#define CMD_STATEVECTOR_BLOCK               0x03
-#define CMD_STATEVECTOR_FULL                0x09
-#define CMD_START_SESSION                   0x8a
-#define CMD_STOP_SESSION                    0x8b
-#define CMD_FLASH_ERASE                     0x8c
-#define CMD_FLASH_MAKE_FAT                  0x90
-#define CMD_FLASH_FREE_SPACE                0x0f
-#define CMD_FLASH_READ_BLOCK                0x0e
-#define CMD_FLASH_READ_SESSION_BLOCK        0x11
-#define CMD_FLASH_SESSION_SIZE              0x0d
+#define CMD_VERSION                         0x01    // 1
+#define CMD_ID                              0x06    // 6
+#define CMD_SERIAL                          0x07    // 7
+#define CMD_STATUS                          0x14    // 20
+#define CMD_BINR_START                      0x84    // 132
+#define CMD_BINR_STOP                       0x85    // 133
+#define CMD_STATEVECTOR_BLOCK               0x03    // 3
+#define CMD_STATEVECTOR_FULL                0x09    // 9
+#define CMD_START_SESSION                   0x8a    // 138
+#define CMD_STOP_SESSION                    0x8b    // 139
+#define CMD_FLASH_ERASE                     0x8c    // 140
+#define CMD_FLASH_MAKE_FAT                  0x90    // 144
+#define CMD_FLASH_FREE_SPACE                0x0f    // 15
+#define CMD_FLASH_READ_BLOCK                0x0e    // 14
+#define CMD_FLASH_READ_SESSION_BLOCK        0x11    // 17
+#define CMD_FLASH_SESSION_SIZE              0x0d    // 13
 //***********************
 
 //***** KEYS    *****
@@ -30,8 +30,9 @@
 //*******************
 
 //***** SERVICE COMMANDS    *****
-//#define CLIENT_OPEN_SOCKET       1001
-//#define CLIENT_CLOSE_SOCKET      1002
+#define SERVICE_CMD_MANUAL_DATA            150
+//#define CLIENT_OPEN_SOCKET       151
+//#define CLIENT_CLOSE_SOCKET      152
 //*******************************
 
 //***** CONFIG  *****
@@ -58,7 +59,7 @@ typedef struct
     unsigned char dev_addr = 0;
     unsigned char cmd = 0;
     QString str = 0;
-    unsigned long int num = 0;
+    int num = 0;
 } cmd_data;
 
 #endif // DEFINES_H

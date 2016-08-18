@@ -42,16 +42,7 @@ void llmdb_client::cmd_handler(cmd_data data)
             (data.cmd == CMD_FLASH_FREE_SPACE)
             )
     {
-        int size = 3;
-        char* temp = new char[size];
-        temp[0] = data.dev_addr;
-        temp[1] = data.cmd;
-        temp[2] = temp[0];
-        for (int i = 1; i < size - 1; i++)
-            temp[size - 1] ^= temp[i];
-        llmdb_send_message(temp, size);
-        delete [] temp;
-        temp = NULL;
+        small_3_bytes_cmds(data.dev_addr, data.cmd);
 
     } else
         // For similar cmds (5 bytes), which require session name
@@ -70,19 +61,8 @@ void llmdb_client::cmd_handler(cmd_data data)
                 session_name[i] = str_split[i].toInt(&ok, 16);
             }
 
-            int size = 5;
-            char* temp = new char[size];
-            temp[0] = data.dev_addr;
-            temp[1] = data.cmd;
-            temp[2] = session_name[0];
-            temp[3] = session_name[1];
-            temp[4] = temp[0];
-            for (int i = 1; i < size - 1; i++)
-                temp[size - 1] ^= temp[i];
-            llmdb_send_message(temp, size);
-            delete [] temp;
+            medium_5_bytes_cmds(data.dev_addr, data.cmd, session_name);
             delete [] session_name;
-            temp = NULL;
             session_name = NULL;
 
         } else
@@ -90,21 +70,44 @@ void llmdb_client::cmd_handler(cmd_data data)
         {
             switch (data.cmd) {
             case CMD_FLASH_READ_BLOCK:{
-                int size = 7;
+                flash_read_block(data.dev_addr, data.num);
+                break;
+                }
+            case CMD_FLASH_READ_SESSION_BLOCK:{
+                unsigned char* session_name = new unsigned char[2];
+                data.str = data.str.simplified();
+                if (data.str.length() == 0)
+                    return;
+                QStringList str_split = data.str.split(" ");
+                for (int i = 0; i < 2; i++)
+                {
+                    bool ok;
+                    session_name[i] = str_split[i].toInt(&ok, 16);
+                }
+
+                flash_read_session_block(data.dev_addr, session_name, data.num);
+                delete [] session_name;
+                session_name = NULL;
+                break;
+                }
+            case SERVICE_CMD_MANUAL_DATA:{
+                data.str = data.str.simplified();
+                if (data.str.length() == 0)
+                    return;
+                QStringList str_split = data.str.split(" ");
+                int size = str_split.size() + 2;
                 char* temp = new char[size];
                 temp[0] = data.dev_addr;
-                temp[1] = data.cmd;
-                temp[2] = data.num & 0xFF;
-                temp[3] = (data.num >> 8) & 0xFF;
-                temp[4] = (data.num >> 16) & 0xFF;
-                temp[5] = (data.num >> 24) & 0xFF;
-                temp[6] = temp[0];
+                temp[size - 1] = temp[0];
                 for (int i = 1; i < size - 1; i++)
+                {
+                    bool ok;
+                    temp[i] = str_split[i - 1].toInt(&ok, 16);
                     temp[size - 1] ^= temp[i];
+                }
                 llmdb_send_message(temp, size);
                 delete [] temp;
                 temp = NULL;
-                break;
                 }
             }
 
@@ -163,4 +166,72 @@ void llmdb_client::onSocketError()
 {
     emit response(0, sock.errorString(), NULL, 0);
     sock.close();
+}
+
+void llmdb_client::small_3_bytes_cmds(char addr, unsigned char cmd)
+{
+    int size = 3;
+    char* temp = new char[size];
+    temp[0] = addr;
+    temp[1] = cmd;
+    temp[2] = temp[0];
+    for (int i = 1; i < size - 1; i++)
+        temp[size - 1] ^= temp[i];
+    llmdb_send_message(temp, size);
+    delete [] temp;
+    temp = NULL;
+}
+
+void llmdb_client::medium_5_bytes_cmds(char addr, unsigned char cmd, unsigned char *session_name)
+{
+    int size = 5;
+    char* temp = new char[size];
+    temp[0] = addr;
+    temp[1] = cmd;
+    temp[2] = session_name[0];
+    temp[3] = session_name[1];
+    temp[4] = temp[0];
+    for (int i = 1; i < size - 1; i++)
+        temp[size - 1] ^= temp[i];
+    llmdb_send_message(temp, size);
+    delete [] temp;
+    temp = NULL;
+}
+
+void llmdb_client::flash_read_block(char addr, int block_num)
+{
+    int size = 7;
+    char* temp = new char[size];
+    temp[0] = addr;
+    temp[1] = CMD_FLASH_READ_BLOCK;
+    temp[2] = block_num & 0xFF;
+    temp[3] = (block_num >> 8) & 0xFF;
+    temp[4] = (block_num >> 16) & 0xFF;
+    temp[5] = (block_num >> 24) & 0xFF;
+    temp[6] = temp[0];
+    for (int i = 1; i < size - 1; i++)
+        temp[size - 1] ^= temp[i];
+    llmdb_send_message(temp, size);
+    delete [] temp;
+    temp = NULL;
+}
+
+void llmdb_client::flash_read_session_block(char addr, unsigned char *session_name, int session_block_num)
+{
+    int size = 9;
+    char* temp = new char[size];
+    temp[0] = addr;
+    temp[1] = CMD_FLASH_READ_SESSION_BLOCK;
+    temp[2] = session_name[0];
+    temp[3] = session_name[1];
+    temp[4] = session_block_num & 0xFF;
+    temp[5] = (session_block_num >> 8) & 0xFF;
+    temp[6] = (session_block_num >> 16) & 0xFF;
+    temp[7] = (session_block_num >> 24) & 0xFF;
+    temp[8] = temp[0];
+    for (int i = 1; i < size - 1; i++)
+        temp[size - 1] ^= temp[i];
+    llmdb_send_message(temp, size);
+    delete [] temp;
+    temp = NULL;
 }

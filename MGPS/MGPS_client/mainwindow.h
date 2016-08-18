@@ -62,6 +62,8 @@ private slots:
 
     void on_checkBox_contents_toggled(bool checked);
 
+    void on_lineEdit_send_returnPressed();
+
 private:
     Ui::MainWindow *ui;
     llmdb_client* client;
