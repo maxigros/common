@@ -51,6 +51,10 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
         ui->label_flash_free_space_pages->setText(QString("%1 pages").arg(t / 528));
         break;
     }
+    case KEY_AUTO_MODE_OFF:{
+        emit mode_changed(MODE_NONE);
+        break;
+    }
     default:
         break;
     }
@@ -59,34 +63,42 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
 void MainWindow::mode_handler(int new_mode)
 {
     switch (new_mode) {
-    case MODE_SESSIONS_REC:
+    case MODE_SESSIONS_REC:{
         ui->groupBox_sessions_rec->setEnabled(false);
         ui->groupBox_session_download->setEnabled(false);
         ui->groupBox_flash_download->setEnabled(false);
         ui->statusBar->showMessage("Sessions Rec Active!", 0);
-        client->initiate_mode(MODE_SESSIONS_REC);
+        int* temp = new int[6];
+        temp[0] = ui->lineEdit_session_rec_quantity->text().toInt();
+        client->initiate_mode(MODE_SESSIONS_REC, ui->device_addr_line->text().toInt(), temp, NULL);
+        delete [] temp;
+        temp = NULL;
         break;
-    case MODE_SESSION_DOWNLOAD:
+        }
+    case MODE_SESSION_DOWNLOAD:{
         ui->groupBox_sessions_rec->setEnabled(false);
         ui->groupBox_session_download->setEnabled(false);
         ui->groupBox_flash_download->setEnabled(false);
         ui->statusBar->showMessage("Session Download Active!", 0);
-        client->initiate_mode(MODE_SESSION_DOWNLOAD);
+//        client->initiate_mode(MODE_SESSION_DOWNLOAD, ui->device_addr_line->text().toInt());
         break;
-    case MODE_FLASH_DOWNLOAD:
+        }
+    case MODE_FLASH_DOWNLOAD:{
         ui->groupBox_sessions_rec->setEnabled(false);
         ui->groupBox_session_download->setEnabled(false);
         ui->groupBox_flash_download->setEnabled(false);
         ui->statusBar->showMessage("Flash Download Active!", 0);
-        client->initiate_mode(MODE_FLASH_DOWNLOAD);
+//        client->initiate_mode(MODE_FLASH_DOWNLOAD, ui->device_addr_line->text().toInt());
         break;
-    case MODE_NONE:
+        }
+    case MODE_NONE:{
         ui->groupBox_sessions_rec->setEnabled(true);
         ui->groupBox_session_download->setEnabled(true);
         ui->groupBox_flash_download->setEnabled(true);
         ui->statusBar->clearMessage();
-        client->initiate_mode(MODE_NONE);
+        client->initiate_mode(MODE_NONE, ui->device_addr_line->text().toInt(), NULL, NULL);
         break;
+        }
     default:
         break;
     }
@@ -212,7 +224,7 @@ void MainWindow::on_button_device_status_clicked()
 
 void MainWindow::on_button_sessions_rec_start_clicked()
 {
-    mode_changed(MODE_SESSIONS_REC);
+    emit mode_changed(MODE_SESSIONS_REC);
 }
 
 void MainWindow::on_button_session_size_refresh_clicked()
@@ -222,12 +234,12 @@ void MainWindow::on_button_session_size_refresh_clicked()
 
 void MainWindow::on_button_session_download_start_clicked()
 {
-    mode_changed(MODE_SESSION_DOWNLOAD);
+    emit mode_changed(MODE_SESSION_DOWNLOAD);
 }
 
 void MainWindow::on_button_flash_download_start_clicked()
 {
-    mode_changed(MODE_FLASH_DOWNLOAD);
+    emit mode_changed(MODE_FLASH_DOWNLOAD);
 }
 
 void MainWindow::on_checkBox_sessions_rec_contents_toggled(bool checked)
@@ -237,7 +249,7 @@ void MainWindow::on_checkBox_sessions_rec_contents_toggled(bool checked)
 
 void MainWindow::on_pushButton_auto_stop_all_clicked()
 {
-    mode_changed(MODE_NONE);
+    emit mode_changed(MODE_NONE);
 }
 
 void MainWindow::on_lineEdit_send_returnPressed()

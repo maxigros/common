@@ -29,12 +29,13 @@
 #define KEY_FLASH_FREE_SPACE    3
 #define KEY_MODE_CHANGED        4
 #define KEY_PROGRESS_BAR        5
+#define KEY_AUTO_MODE_OFF       6
 //*******************
 
 //***** SERVICE COMMANDS    *****
 #define SERVICE_CMD_MANUAL_DATA            150
-//#define CLIENT_OPEN_SOCKET                 151
-//#define CLIENT_CLOSE_SOCKET                152
+//#define CLIENT_OPEN_SOCKET                 161
+//#define CLIENT_CLOSE_SOCKET                162
 //*******************************
 
 //****  MODES   *****
@@ -46,8 +47,8 @@
 
 //***** CONFIG  *****
 
-//#define SESSION_DURATION   5000    // msec
-//#define LLMDB_TIMEOUT      50      // msec
+#define SESSION_DURATION   5000    // msec
+#define LLMDB_TIMEOUT      100      // msec
 
 /*
  * Uncomment to enable asking free space after each session
