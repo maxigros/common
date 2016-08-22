@@ -13,11 +13,12 @@ public:
 
     void open_socket();
     void close_socket();
-    void cmd_handler(cmd_data data);
+    void cmd_handler(cmd_data *data);
     QString host_addr;
 
 protected:
     QUdpSocket      sock;
+    bool sock_is_open;
     void llmdb_send_message(char* msg, int size);
 
 

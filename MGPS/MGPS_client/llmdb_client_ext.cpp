@@ -1,4 +1,5 @@
 #include "llmdb_client_ext.h"
+#include <ctime>
 
 llmdb_client_ext::llmdb_client_ext(QObject *parent) : llmdb_client(parent)
 {
@@ -6,6 +7,7 @@ llmdb_client_ext::llmdb_client_ext(QObject *parent) : llmdb_client(parent)
     mode_flash_download = false;
     mode_sessions_rec = false;
     mode_session_download = false;
+    next_message = new cmd_data();
 
     connect(&timer_repeat, SIGNAL(timeout()),
             this, SLOT(timer_repeat_timeout()));
@@ -17,16 +19,13 @@ llmdb_client_ext::llmdb_client_ext(QObject *parent) : llmdb_client(parent)
 
 void llmdb_client_ext::initiate_mode(mode_task *task)
 {
-    next_message.dev_addr = task->dev_addr;
+    next_message->dev_addr = task->dev_addr;
     switch (task->mode) {
     case MODE_SESSIONS_REC:
         start_sessions_rec(task->data);
         break;
     case MODE_SESSION_DOWNLOAD:
-        mode_none = false;
-        mode_flash_download = false;
-        mode_sessions_rec = false;
-        mode_session_download = true;
+        start_session_download(task->str);
         break;
     case MODE_FLASH_DOWNLOAD:
         mode_none = false;
@@ -44,33 +43,6 @@ void llmdb_client_ext::initiate_mode(mode_task *task)
     default:
         break;
     }
-}
-
-void llmdb_client_ext::start_sessions_rec(int *data)
-{
-    mode_none = false;
-    mode_flash_download = false;
-    mode_sessions_rec = true;
-    mode_session_download = false;
-
-    sessions_rec_counter = 1;
-    sessions_rec_quantity = data[0];
-    // Set duration mode
-    if (data[1]) // random
-    {
-
-    }
-    else // Manual
-        sessions_rec_duration = data[2];
-
-    // Set status request mode
-    if (data[3])
-        timer_flash_status.start(data[4] * 1000);
-
-    sessions_rec_contents_check_mode = data[5];
-
-    timer_repeat.start(LLMDB_TIMEOUT);
-    small_3_bytes_cmds(next_message.dev_addr, CMD_BINR_START);
 }
 
 void llmdb_client_ext::onSocketDataReady()
@@ -109,24 +81,37 @@ void llmdb_client_ext::onSocketDataReady()
 
         if (!mode_none)
         {
-            timer_repeat.stop();
             if (mode_sessions_rec)
             {
+                if (buf[0] == (((CMD_STATUS >> 3) + CMD_STATUS) & 0x0F) | (0x03 << 4))
+                {
+                    timer_repeat.start(LLMDB_TIMEOUT);
+                    return;
+                }
+                timer_repeat.stop();
+
                 switch (buf[0]) {
                 case ((((CMD_BINR_START >> 3) + CMD_BINR_START) & 0x0F) | (0x00 << 4)):{
                     unsigned char temp1 = (sessions_rec_counter >> 8) & 0xFF;
                     unsigned char temp2 = sessions_rec_counter & 0xFF;
-                    next_message.str = QString("%1 %2")
+                    next_message->str = QString("%1 %2")
                                                     .arg(temp1)
                                                     .arg(temp2);
-                    next_message.cmd = CMD_START_SESSION;
+                    next_message->cmd = CMD_START_SESSION;
                     timer_repeat.start(LLMDB_TIMEOUT);
                     cmd_handler(next_message);
                     break;
                 }
                 case ((((CMD_START_SESSION >> 3) + CMD_START_SESSION) & 0x0F) | (0x00 << 4)):{
-                    next_message.cmd = CMD_STOP_SESSION;
-                    timer_session_rec_duration.start(SESSION_DURATION);
+                    next_message->cmd = CMD_STOP_SESSION;
+                    if (sessions_rec_duration_random)
+                    {
+                        srand(time(NULL));
+                        sessions_rec_duration = rand() % 7 + 3;     // sec
+                        qDebug() << sessions_rec_duration;
+                    }
+                    timer_session_rec_duration.start(sessions_rec_duration * 1000);
+
                     session_rec_in_progress = true;
                     break;
                 }
@@ -144,28 +129,28 @@ void llmdb_client_ext::onSocketDataReady()
                         }
                         unsigned char temp1 = (sessions_rec_counter >> 8) & 0xFF;
                         unsigned char temp2 = sessions_rec_counter & 0xFF;
-                        next_message.str = QString("%1 %2")
+                        next_message->str = QString("%1 %2")
                                                         .arg(temp1)
                                                         .arg(temp2);
-                        next_message.cmd = CMD_START_SESSION;
+                        next_message->cmd = CMD_START_SESSION;
                         cmd_handler(next_message);
                         timer_repeat.start(LLMDB_TIMEOUT);
                     }
                     else
                         // contents check
                     {
-                        next_message.cmd = CMD_FLASH_READ_BLOCK;
-                        next_message.num = 1;
+                        next_message->cmd = CMD_FLASH_READ_BLOCK;
+                        next_message->num = 1;
                         cmd_handler(next_message);
                         timer_repeat.start(LLMDB_TIMEOUT);
                     }
                     break;
                 }
-                case ((((CMD_FLASH_READ_BLOCK >> 3) + CMD_FLASH_READ_BLOCK) & 0x0F) | (0x04 << 4)):
+                case ((((CMD_FLASH_READ_BLOCK >> 3) + CMD_FLASH_READ_BLOCK) & 0x0F) | (0x03 << 4)):
                 // may occur only if contents check is on
                 {
                     // contents wrong
-                    if (!check_contents(buf))
+                    if (!check_contents(&buf[5]))
                     {
                         mode_task* temp = new mode_task();
                         temp->mode = MODE_NONE;
@@ -192,10 +177,10 @@ void llmdb_client_ext::onSocketDataReady()
                     }
                     unsigned char temp1 = (sessions_rec_counter >> 8) & 0xFF;
                     unsigned char temp2 = sessions_rec_counter & 0xFF;
-                    next_message.str = QString("%1 %2")
+                    next_message->str = QString("%1 %2")
                                                     .arg(temp1)
                                                     .arg(temp2);
-                    next_message.cmd = CMD_START_SESSION;
+                    next_message->cmd = CMD_START_SESSION;
                     cmd_handler(next_message);
                     timer_repeat.start(LLMDB_TIMEOUT);
                 }
@@ -203,11 +188,60 @@ void llmdb_client_ext::onSocketDataReady()
                     break;
                 }
             }
+
+
         }
 
         delete [] buf;
         buf = NULL;
     }
+}
+
+void llmdb_client_ext::start_sessions_rec(int *data)
+{
+    mode_none = false;
+    mode_flash_download = false;
+    mode_sessions_rec = true;
+    mode_session_download = false;
+
+    sessions_rec_counter = 1;
+    sessions_rec_quantity = data[0];
+    // Set duration mode
+    if (data[1]) // random
+    {
+
+        sessions_rec_duration_random = true;
+    }
+    else // Manual
+    {
+        sessions_rec_duration = data[2];    // sec
+        sessions_rec_duration_random = false;
+    }
+
+    // Set status request mode
+    if (!data[3])
+        timer_flash_status.start(data[4] * 1000);
+
+    sessions_rec_contents_check_mode = data[5];
+
+    next_message->cmd = CMD_BINR_START;
+    cmd_handler(next_message);
+    timer_repeat.start(LLMDB_TIMEOUT);
+}
+
+void llmdb_client_ext::start_session_download(QString session_name_str)
+{
+    mode_none = false;
+    mode_flash_download = false;
+    mode_sessions_rec = false;
+    mode_session_download = true;
+
+    session_download_block_counter = 1;
+
+    next_message->cmd = CMD_FLASH_SESSION_SIZE;
+    next_message->str = session_name_str;
+    cmd_handler(next_message);
+    timer_repeat.start(LLMDB_TIMEOUT);
 }
 
 void llmdb_client_ext::timers_stop()
@@ -232,8 +266,9 @@ void llmdb_client_ext::timer_session_rec_duration_timeout()
 void llmdb_client_ext::timer_flash_status_timeout()
 {
     cmd_data* temp_message = new cmd_data();
-    temp_message->dev_addr = next_message.dev_addr;
+    temp_message->dev_addr = next_message->dev_addr;
     temp_message->cmd = CMD_STATUS;
+    cmd_handler(temp_message);
     delete temp_message;
     temp_message = NULL;
 }
@@ -241,6 +276,14 @@ void llmdb_client_ext::timer_flash_status_timeout()
 bool llmdb_client_ext::check_contents(char *data)
 {
     bool ok = false;
-    // if ...
+    if (data[0] == 'M' &&
+        data[1] == 'G' &&
+        data[2] == 'P' &&
+        data[3] == 'S'
+            )
+        ok = true;
+
     return ok;
 }
+
+

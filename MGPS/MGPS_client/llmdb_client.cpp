@@ -2,15 +2,18 @@
 
 llmdb_client::llmdb_client(QObject *parent) : QObject(parent)
 {
+    sock_is_open = false;
     connect(&sock, SIGNAL(readyRead()), SLOT(onSocketDataReady()));
 }
 
 void llmdb_client::open_socket()
 {
-    sock.close();
+    if (sock_is_open)
+        sock.close();
 
     if(sock.bind())
     {
+        sock_is_open = true;
         emit response(0, QString::fromUtf8("Socket opened on port: ")
                  + QString::number(sock.localPort()), NULL, 0);
 
@@ -27,77 +30,82 @@ void llmdb_client::open_socket()
 void llmdb_client::close_socket()
 {
     sock.close();
+    sock_is_open = false;
     emit response(0, QString("Socket closed"), NULL, 0);
 }
 
-void llmdb_client::cmd_handler(cmd_data data)
+void llmdb_client::cmd_handler(cmd_data *data)
 {
+    if (!sock_is_open)
+    {
+        return;
+    }
     // For similar small cmds (3 bytes)
-    if (    (data.cmd == CMD_BINR_START)        ||
-            (data.cmd == CMD_BINR_STOP)         ||
-            (data.cmd == CMD_STATUS)            ||
-            (data.cmd == CMD_STOP_SESSION)      ||
-            (data.cmd == CMD_FLASH_ERASE)       ||
-            (data.cmd == CMD_FLASH_MAKE_FAT)    ||
-            (data.cmd == CMD_FLASH_FREE_SPACE)
+    if (    (data->cmd == CMD_BINR_START)        ||
+            (data->cmd == CMD_BINR_STOP)         ||
+            (data->cmd == CMD_STATUS)            ||
+            (data->cmd == CMD_STOP_SESSION)      ||
+            (data->cmd == CMD_FLASH_ERASE)       ||
+            (data->cmd == CMD_FLASH_MAKE_FAT)    ||
+            (data->cmd == CMD_FLASH_FREE_SPACE)
             )
     {
-        small_3_bytes_cmds(data.dev_addr, data.cmd);
+        small_3_bytes_cmds(data->dev_addr, data->cmd);
 
     } else
         // For similar cmds (5 bytes), which require session name
-        if ((data.cmd == CMD_START_SESSION)       ||
-            (data.cmd == CMD_FLASH_SESSION_SIZE)
+        if ((data->cmd == CMD_START_SESSION)       ||
+            (data->cmd == CMD_FLASH_SESSION_SIZE)
             )
         {
             unsigned char* session_name = new unsigned char[2];
-            data.str = data.str.simplified();
-            if (data.str.length() == 0)
+            data->str = data->str.simplified();
+            if (data->str.length() == 0)
                 return;
-            QStringList str_split = data.str.split(" ");
+            QStringList str_split = data->str.split(" ");
             for (int i = 0; i < 2; i++)
             {
                 bool ok;
                 session_name[i] = str_split[i].toInt(&ok, 16);
             }
 
-            medium_5_bytes_cmds(data.dev_addr, data.cmd, session_name);
+            medium_5_bytes_cmds(data->dev_addr, data->cmd, session_name);
             delete [] session_name;
             session_name = NULL;
 
         } else
             // For the rest
         {
-            switch (data.cmd) {
+            switch (data->cmd) {
             case CMD_FLASH_READ_BLOCK:{
-                flash_read_block(data.dev_addr, data.num);
+                flash_read_block(data->dev_addr, data->num);
                 break;
                 }
             case CMD_FLASH_READ_SESSION_BLOCK:{
                 unsigned char* session_name = new unsigned char[2];
-                data.str = data.str.simplified();
-                if (data.str.length() == 0)
+                data->str = data->str.simplified();
+                if (data->str.length() == 0)
                     return;
-                QStringList str_split = data.str.split(" ");
+                QStringList str_split = data->str.split(" ");
                 for (int i = 0; i < 2; i++)
                 {
                     bool ok;
                     session_name[i] = str_split[i].toInt(&ok, 16);
                 }
 
-                flash_read_session_block(data.dev_addr, session_name, data.num);
+                flash_read_session_block(data->dev_addr, session_name, data->num);
                 delete [] session_name;
                 session_name = NULL;
                 break;
                 }
             case SERVICE_CMD_MANUAL_DATA:{
-                data.str = data.str.simplified();
-                if (data.str.length() == 0)
+                data->str = data->str.simplified();
+                if (data->str.length() == 0)
                     return;
-                QStringList str_split = data.str.split(" ");
+                QStringList str_split = data->str.split(" ");
                 int size = str_split.size() + 2;
                 char* temp = new char[size];
-                temp[0] = data.dev_addr;
+                temp[0] = data->dev_addr;
                 temp[size - 1] = temp[0];
                 for (int i = 1; i < size - 1; i++)
                 {

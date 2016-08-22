@@ -3,7 +3,6 @@
 
 #include "llmdb_client.h"
 #include <QTimer>
-#include <QFile>
 
 
 class llmdb_client_ext : public llmdb_client
@@ -17,7 +16,7 @@ private:
     QTimer timer_repeat;
     QTimer timer_session_rec_duration;
     QTimer timer_flash_status;
-    cmd_data next_message;
+    cmd_data* next_message;
 
     void onSocketDataReady();
     void timers_stop();
@@ -54,13 +53,18 @@ private:
     int sessions_rec_counter;
     int sessions_rec_quantity;
     int sessions_rec_duration;
+    bool sessions_rec_duration_random;
     int sessions_rec_contents_check_mode;
     bool session_rec_in_progress = false;
     bool check_contents(char *data);
 
+    /*
+     *  SESSION DOWNLOAD mode
+     */
+    void start_session_download(QString session_name_str);
+    int session_download_block_counter;
+    int session_download_block_number;
 
-
-    // Logs !!!
 
 private slots:
     void timer_repeat_timeout();

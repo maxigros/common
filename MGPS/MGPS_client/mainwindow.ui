@@ -737,7 +737,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit_session_rec_duration"/>
+                  <widget class="QLineEdit" name="lineEdit_session_rec_duration">
+                   <property name="text">
+                    <string>5</string>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <spacer name="horizontalSpacer_15">
@@ -767,7 +771,7 @@
                   <widget class="QComboBox" name="comboBox_session_rec_status_mode">
                    <item>
                     <property name="text">
-                     <string>Intervals</string>
+                     <string>Interval</string>
                     </property>
                    </item>
                    <item>
@@ -778,7 +782,11 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit_session_rec_status"/>
+                  <widget class="QLineEdit" name="lineEdit_session_rec_status">
+                   <property name="text">
+                    <string>1</string>
+                   </property>
+                  </widget>
                  </item>
                  <item>
                   <spacer name="horizontalSpacer_16">
@@ -801,6 +809,9 @@
                   <widget class="QCheckBox" name="checkBox_sessions_rec_contents">
                    <property name="text">
                     <string>Check Contents</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
                    </property>
                   </widget>
                  </item>
@@ -905,7 +916,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLineEdit" name="lineEdit_8"/>
+                  <widget class="QLineEdit" name="lineEdit_session_download_name"/>
                  </item>
                  <item>
                   <spacer name="horizontalSpacer_20">
@@ -1131,6 +1142,13 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <widget class="QCheckBox" name="checkBox_general_log">
+         <property name="text">
+          <string>Logs</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QTextEdit" name="textEdit_log"/>
        </item>
        <item>
@@ -1181,7 +1199,7 @@
      <x>0</x>
      <y>0</y>
      <width>1224</width>
-     <height>30</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

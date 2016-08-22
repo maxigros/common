@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFile>
+#include <QTextStream>
 #include "defines.h"
 #include "llmdb_client_ext.h"
 
@@ -70,10 +72,14 @@ private slots:
 
     void on_comboBox_session_rec_status_mode_currentIndexChanged(int index);
 
+    void on_checkBox_general_log_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     llmdb_client_ext* client;
     mode_task* task;
+    QFile *general_log;
+    QTextStream *general_log_stream;
 
 signals:
     void mode_changed(int new_mode);
