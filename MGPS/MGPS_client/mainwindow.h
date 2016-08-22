@@ -64,13 +64,16 @@ private slots:
 
     void on_pushButton_auto_stop_all_clicked();
 
-    void on_checkBox_sessions_rec_contents_toggled(bool checked);
-
     void on_lineEdit_send_returnPressed();
+
+    void on_comboBox_session_rec_duration_mode_currentIndexChanged(int index);
+
+    void on_comboBox_session_rec_status_mode_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;
     llmdb_client_ext* client;
+    mode_task* task;
 
 signals:
     void mode_changed(int new_mode);

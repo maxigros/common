@@ -21,6 +21,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::receive_data_from_client(int key, QString msg, char *data, int size)
 {
+    size = size; // warning 'unused variable'
     ui->textEdit_log->append(msg);
     if (!key)
         return;
@@ -55,6 +56,10 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
         emit mode_changed(MODE_NONE);
         break;
     }
+    case KEY_FLASH_CONTENTS_ERROR:{
+        ui->statusBar->showMessage("Contents Error");
+        break;
+    }
     default:
         break;
     }
@@ -62,17 +67,34 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
 
 void MainWindow::mode_handler(int new_mode)
 {
+    ui->statusBar->clearMessage();
     switch (new_mode) {
     case MODE_SESSIONS_REC:{
         ui->groupBox_sessions_rec->setEnabled(false);
         ui->groupBox_session_download->setEnabled(false);
         ui->groupBox_flash_download->setEnabled(false);
         ui->statusBar->showMessage("Sessions Rec Active!", 0);
-        int* temp = new int[6];
-        temp[0] = ui->lineEdit_session_rec_quantity->text().toInt();
-        client->initiate_mode(MODE_SESSIONS_REC, ui->device_addr_line->text().toInt(), temp, NULL);
-        delete [] temp;
-        temp = NULL;
+        task = new mode_task();
+        task->mode = MODE_SESSIONS_REC;
+        task->dev_addr = ui->device_addr_line->text().toInt();
+        // Sessions quantity
+        task->data[0] = ui->lineEdit_session_rec_quantity->text().toInt();
+        // Duration mode
+        task->data[1] = ui->comboBox_session_rec_duration_mode->currentIndex();
+        // Duration (sec)
+        task->data[2] = ui->lineEdit_session_rec_duration->text().toInt();
+        // Status request mode
+        task->data[3] = ui->comboBox_session_rec_status_mode->currentIndex();
+        // Status request interval
+        task->data[4] = ui->lineEdit_session_rec_status->text().toInt();
+        // Contents check
+        if (ui->checkBox_sessions_rec_contents->isChecked())
+            task->data[5] = 1;
+        else
+            task->data[5] = 0;
+
+        client->initiate_mode(task);
+        delete task;
         break;
         }
     case MODE_SESSION_DOWNLOAD:{
@@ -96,7 +118,10 @@ void MainWindow::mode_handler(int new_mode)
         ui->groupBox_session_download->setEnabled(true);
         ui->groupBox_flash_download->setEnabled(true);
         ui->statusBar->clearMessage();
-        client->initiate_mode(MODE_NONE, ui->device_addr_line->text().toInt(), NULL, NULL);
+        task = new mode_task();
+        task->mode = MODE_NONE;
+        client->initiate_mode(task);
+        delete task;
         break;
         }
     default:
@@ -242,11 +267,6 @@ void MainWindow::on_button_flash_download_start_clicked()
     emit mode_changed(MODE_FLASH_DOWNLOAD);
 }
 
-void MainWindow::on_checkBox_sessions_rec_contents_toggled(bool checked)
-{
-
-}
-
 void MainWindow::on_pushButton_auto_stop_all_clicked()
 {
     emit mode_changed(MODE_NONE);
@@ -260,4 +280,20 @@ void MainWindow::on_lineEdit_send_returnPressed()
     command.str = ui->lineEdit_send->text();
     ui->lineEdit_send->clear();
     client->cmd_handler(command);
+}
+
+void MainWindow::on_comboBox_session_rec_duration_mode_currentIndexChanged(int index)
+{
+    if (index)
+        ui->lineEdit_session_rec_duration->setEnabled(false);
+    else
+        ui->lineEdit_session_rec_duration->setEnabled(true);
+}
+
+void MainWindow::on_comboBox_session_rec_status_mode_currentIndexChanged(int index)
+{
+    if (index)
+        ui->lineEdit_session_rec_status->setEnabled(false);
+    else
+        ui->lineEdit_session_rec_status->setEnabled(true);
 }

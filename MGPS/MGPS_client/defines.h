@@ -24,12 +24,13 @@
 //***********************
 
 //***** KEYS    *****
-#define KEY_STATUS              1
-#define KEY_SESSION_SIZE        2
-#define KEY_FLASH_FREE_SPACE    3
-#define KEY_MODE_CHANGED        4
-#define KEY_PROGRESS_BAR        5
-#define KEY_AUTO_MODE_OFF       6
+#define KEY_STATUS                  1
+#define KEY_SESSION_SIZE            2
+#define KEY_FLASH_FREE_SPACE        3
+#define KEY_MODE_CHANGED            4
+#define KEY_PROGRESS_BAR            5
+#define KEY_AUTO_MODE_OFF           6
+#define KEY_FLASH_CONTENTS_ERROR    7
 //*******************
 
 //***** SERVICE COMMANDS    *****
@@ -71,5 +72,13 @@ typedef struct
     QString str = 0;
     int num = 0;
 } cmd_data;
+
+typedef struct
+{
+    int mode;
+    unsigned char dev_addr;
+    int data[6];
+    QString str;
+} mode_task;
 
 #endif // DEFINES_H
