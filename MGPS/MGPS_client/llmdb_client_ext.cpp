@@ -60,7 +60,7 @@ void llmdb_client_ext::start_sessions_rec(int *data)
     {
 
     }
-    else // manual
+    else // Manual
         sessions_rec_duration = data[2];
 
     // Set status request mode
