@@ -105,7 +105,7 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
 
         int* all_blocks = new int;
         if (ui->comboBox_flash_download->currentIndex())
-            *all_blocks = FLASH_PAGE_NUMBER;
+            *all_blocks = FLASH_PAGES_QUANTITY;
         else
             *all_blocks = ui->lineEdit_flash_download_blocks_num->text().toInt();
 
@@ -171,11 +171,20 @@ void MainWindow::mode_handler(int new_mode)
         task->dev_addr = ui->device_addr_line->text().toInt();
         task->str = ui->lineEdit_session_download_name->text();
 
-        if (!QDir("logs").exists())
-            QDir().mkdir("logs");
-        session_download_log.setFileName(QString("logs/session(%1)_log(%2).log")
-                                          .arg(task->str)
-                                          .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
+        if (!QDir("../MGPS_logs").exists())
+            QDir().mkdir("../MGPS_logs");
+
+        if (!QDir(QString("../MGPS_logs/%1")
+                  .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))).exists())
+        {
+            QDir().mkdir(QString("../MGPS_logs/%1")
+                         .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy")));
+        }
+
+        session_download_log.setFileName(QString("../MGPS_logs/%1/session(%2)_log(%3).log")
+                                         .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
+                                         .arg(task->str)
+                                         .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
         session_download_log.open(QFile::WriteOnly);
 
         client->initiate_mode(task);
@@ -195,18 +204,28 @@ void MainWindow::mode_handler(int new_mode)
         task->data[0] = ui->comboBox_flash_download->currentIndex();
         task->data[1] = ui->lineEdit_flash_download_blocks_num->text().toInt();
 
-        if (!QDir("logs").exists())
-            QDir().mkdir("logs");
+        if (!QDir("../MGPS_logs").exists())
+            QDir().mkdir("../MGPS_logs");
+
+        if (!QDir(QString("../MGPS_logs/%1")
+                  .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))).exists())
+        {
+            QDir().mkdir(QString("../MGPS_logs/%1")
+                         .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy")));
+        }
+
         if (!task->data[0])
         {
-            flash_download_log.setFileName(QString("logs/flash_first(%1)_log(%2).log")
-                                              .arg(task->data[1])
-                                              .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
+            flash_download_log.setFileName(QString("../MGPS_logs/%1/flash_first(%2)_log(%3).log")
+                                           .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
+                                           .arg(task->data[1])
+                                           .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
         }
         else
         {
-            flash_download_log.setFileName(QString("logs/flash_full_log(%1).log")
-                                              .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
+            flash_download_log.setFileName(QString("../MGPS_logs/%1/flash_full_log(%2).log")
+                                           .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
+                                           .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
         }
         flash_download_log.open(QFile::WriteOnly);
 

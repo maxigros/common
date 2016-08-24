@@ -57,6 +57,7 @@ private:
     int sessions_rec_contents_check_mode;
     bool session_rec_in_progress = false;
     bool check_contents(char *data);
+    int sessions_rec_contents_counter;
 
     /*
      *  SESSION DOWNLOAD mode

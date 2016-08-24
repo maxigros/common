@@ -174,8 +174,9 @@ void llmdb_client_ext::onSocketDataReady()
                     else
                         // contents check
                     {
+                        sessions_rec_contents_counter = 1;
                         next_message->cmd = CMD_FLASH_READ_BLOCK;
-                        next_message->num = 1;
+                        next_message->num = sessions_rec_contents_counter;
                         cmd_handler(next_message);
                         timer_repeat.start(LLMDB_TIMEOUT);
                     }
@@ -185,6 +186,8 @@ void llmdb_client_ext::onSocketDataReady()
                 // may occur only if contents check is on
                 {
                     timer_repeat.stop();
+
+#ifdef OLD_CONTENTS_CHECK
                     // contents wrong
                     if (!check_contents(&buf[5]))
                     {
@@ -202,6 +205,17 @@ void llmdb_client_ext::onSocketDataReady()
                         emit response(key, NULL, NULL, 0);
                         return;
                     }
+#endif
+#ifndef OLD_CONTENTS_CHECK
+                    sessions_rec_contents_counter++;
+
+                    if (sessions_rec_contents_counter <= FLASH_BLOCKS_ON_PAGE_NUMBER)
+                    {
+                        next_message->num = sessions_rec_contents_counter;
+                        cmd_handler(next_message);
+                        timer_repeat.start(LLMDB_TIMEOUT);
+                    }
+#endif
 
                     sessions_rec_counter++;
                     if (sessions_rec_counter > sessions_rec_quantity)
@@ -345,7 +359,7 @@ void llmdb_client_ext::start_flash_download(int *data)
     if (!data[0])
         flash_download_block_number = data[1] * 22;
     else
-        flash_download_block_number = FLASH_PAGE_NUMBER * 22;
+        flash_download_block_number = FLASH_PAGES_QUANTITY * 22;
 
     next_message->cmd = CMD_FLASH_READ_BLOCK;
     next_message->num = flash_download_block_counter;

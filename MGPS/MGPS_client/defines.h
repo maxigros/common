@@ -51,9 +51,12 @@
 
 //***** CONFIG  *****
 
-#define SESSION_DURATION   5000    // msec
-#define LLMDB_TIMEOUT      100      // msec
-#define FLASH_PAGE_NUMBER  8192
+#define SESSION_DURATION                5000    // msec
+#define LLMDB_TIMEOUT                   100      // msec
+#define FLASH_PAGES_QUANTITY            8192
+#define FLASH_BLOCKS_ON_PAGE_NUMBER     22
+
+//#define OLD_CONTENTS_CHECK
 
 /*
  * Uncomment to enable asking free space after each session
@@ -79,10 +82,10 @@ typedef struct
 
 typedef struct
 {
-    int mode;
-    unsigned char dev_addr;
+    int mode = 0;
+    unsigned char dev_addr = 0;
     int data[6];
-    QString str;
+    QString str = 0;
 } mode_task;
 
 #endif // DEFINES_H
