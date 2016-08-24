@@ -65,6 +65,18 @@ private:
     int session_download_block_counter;
     int session_download_block_number;
 
+    /*
+     *  FLASH DOWNLOAD mode
+     *
+     *  Arguments:
+     * data - 2 integers:
+     *      0 - mode (0 - specified number of pages, 1 - full flash)
+     *      1 - number of pages, set by user
+     */
+    void start_flash_download(int *data);
+    int flash_download_block_counter;
+    int flash_download_block_number;
+
 
 private slots:
     void timer_repeat_timeout();

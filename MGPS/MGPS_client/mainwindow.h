@@ -58,7 +58,7 @@ private slots:
 
     void on_button_sessions_rec_start_clicked();
 
-    void on_button_session_size_refresh_clicked();
+    void on_button_session_download_check_clicked();
 
     void on_button_session_download_start_clicked();
 
@@ -74,12 +74,16 @@ private slots:
 
     void on_checkBox_general_log_stateChanged(int arg1);
 
+    void on_comboBox_flash_download_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
     llmdb_client_ext* client;
     mode_task* task;
-    QFile *general_log;
-    QTextStream *general_log_stream;
+    QFile general_log;
+    QTextStream general_log_stream;
+    QFile session_download_log;
+    QFile flash_download_log;
 
 signals:
     void mode_changed(int new_mode);

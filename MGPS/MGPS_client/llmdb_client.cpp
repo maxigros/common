@@ -126,7 +126,7 @@ void llmdb_client::llmdb_send_message(char *msg, int size)
 {
     sock.writeDatagram((char*)msg, size, QHostAddress(host_addr), 1001);
 
-    QString str;
+    QString str = QString(">>>: ");
     for(int i = 0; i < size; i++)
        str += QString("%1 ").arg((unsigned char)msg[i], 2, 16, QChar('0'));
     emit response(0, str, NULL, 0);
@@ -141,13 +141,13 @@ void llmdb_client::onSocketDataReady()
         int s = sock.pendingDatagramSize();
         char* buf = new char[s];
         sock.readDatagram(buf, s, &addr, &port);
-        QString msg = QString("<%1>: ").arg(port);
+        QString msg = QString("<<<: <%1>: ").arg(port);
         for(int i = 0; i < s; i++)
             msg += QString("%1 ").arg((unsigned char)buf[i], 2, 16, QChar('0'));
 
         int key = 0;
 
-        switch (buf[0]) {
+        switch ((unsigned char)buf[0]) {
         case ((((CMD_STATUS >> 3) + CMD_STATUS) & 0x0F) | (0x03 << 4)):
             key = KEY_STATUS;
             break;

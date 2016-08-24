@@ -31,6 +31,9 @@
 #define KEY_PROGRESS_BAR            5
 #define KEY_AUTO_MODE_OFF           6
 #define KEY_FLASH_CONTENTS_ERROR    7
+#define KEY_SESSION_SIZE_ERROR      8
+#define KEY_SESSION_DOWNLOAD_LOG    9
+#define KEY_FLASH_DOWNLOAD_LOG      10
 //*******************
 
 //***** SERVICE COMMANDS    *****
@@ -50,6 +53,7 @@
 
 #define SESSION_DURATION   5000    // msec
 #define LLMDB_TIMEOUT      100      // msec
+#define FLASH_PAGE_NUMBER  8192
 
 /*
  * Uncomment to enable asking free space after each session
