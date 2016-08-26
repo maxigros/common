@@ -214,6 +214,7 @@ void llmdb_client_ext::onSocketDataReady()
                         next_message->num = sessions_rec_contents_counter;
                         cmd_handler(next_message);
                         timer_repeat.start(LLMDB_TIMEOUT);
+                        return;
                     }
 #endif
 

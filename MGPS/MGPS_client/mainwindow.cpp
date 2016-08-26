@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     client = new llmdb_client_ext();
-    client->host_addr = ui->host_addr_line->text();
+    client->set_hostAddress(ui->host_addr_line->text());
     connect(client, SIGNAL(response(int, QString, char*, int)), this, SLOT(receive_data_from_client(int, QString, char*, int)));
     connect(this, SIGNAL(mode_changed(int)), this, SLOT(mode_handler(int)));
 
@@ -69,8 +69,9 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
     case KEY_FLASH_FREE_SPACE:{
         int *t = new int;
         memcpy(t, data + sizeof(unsigned char), 4*sizeof(unsigned char));
-        ui->label_flash_free_space_bytes->setText(QString("%1 bytes").arg(*t));
-        ui->label_flash_free_space_pages->setText(QString("%1 pages").arg(*t / 528));
+        ui->label_flash_free_space->setText(QString("%1 bytes %2 pages")
+                                            .arg(*t)
+                                            .arg(*t / 528));
         delete t;
         break;
     }
@@ -260,7 +261,7 @@ void MainWindow::mode_handler(int new_mode)
 
 void MainWindow::on_host_addr_line_returnPressed()
 {
-    client->host_addr = ui->host_addr_line->text();
+    client->set_hostAddress(ui->host_addr_line->text());
 }
 
 void MainWindow::on_button_open_socket_clicked()
@@ -462,9 +463,20 @@ void MainWindow::on_checkBox_general_log_stateChanged(int arg1)
 {
     if (arg1)
     {
-        if (!QDir("logs").exists())
-            QDir().mkdir("logs");
-        general_log.setFileName(QString("logs/general_log(%1).txt").arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
+        if (!QDir("../MGPS_logs").exists())
+            QDir().mkdir("../MGPS_logs");
+
+        if (!QDir(QString("../MGPS_logs/%1")
+                  .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))).exists())
+        {
+            QDir().mkdir(QString("../MGPS_logs/%1")
+                         .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy")));
+        }
+
+        general_log.setFileName(QString("../MGPS_logs/%1/general_log(%2).txt")
+                                       .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
+                                       .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
+
         general_log.open(QFile::WriteOnly | QFile::Text);
         general_log_stream.setDevice(&general_log);
     }

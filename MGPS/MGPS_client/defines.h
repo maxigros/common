@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QString>
 
+//#define OLD_CONTENTS_CHECK
+
 //***** COMMANDS    *****
 #define CMD_VERSION                         0x01    // 1
 #define CMD_ID                              0x06    // 6
@@ -38,8 +40,6 @@
 
 //***** SERVICE COMMANDS    *****
 #define SERVICE_CMD_MANUAL_DATA            150
-//#define CLIENT_OPEN_SOCKET                 161
-//#define CLIENT_CLOSE_SOCKET                162
 //*******************************
 
 //****  MODES   *****
@@ -50,26 +50,10 @@
 //*******************
 
 //***** CONFIG  *****
-
 #define SESSION_DURATION                5000    // msec
 #define LLMDB_TIMEOUT                   100      // msec
 #define FLASH_PAGES_QUANTITY            8192
 #define FLASH_BLOCKS_ON_PAGE_NUMBER     22
-
-//#define OLD_CONTENTS_CHECK
-
-/*
- * Uncomment to enable asking free space after each session
- * If commented, free space will be asked each 2 sec
- */
-//#define ASK_FREE_SPACE_AFTER_SESSION    1
-
-/*
- * Uncomment to enable random duration of sessions (3 to 10 sec)
- * If commented, duration is set from SESSION_DURATION
- */
-//#define RANDOM_SESSION_DURATION     1
-
 //*******************
 
 typedef struct

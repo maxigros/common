@@ -34,6 +34,11 @@ void llmdb_client::close_socket()
     emit response(0, QString("Socket closed"), NULL, 0);
 }
 
+void llmdb_client::set_hostAddress(QString str)
+{
+    host_addr = str;
+}
+
 void llmdb_client::cmd_handler(cmd_data *data)
 {
     if (!sock_is_open)
