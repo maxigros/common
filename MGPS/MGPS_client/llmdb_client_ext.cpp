@@ -142,7 +142,6 @@ void llmdb_client_ext::onSocketDataReady()
                     {
                         srand(time(NULL));
                         sessions_rec_duration = rand() % 7 + 3;     // sec
-                        qDebug() << sessions_rec_duration;
                     }
                     timer_session_rec_duration.start(sessions_rec_duration * 1000);
 

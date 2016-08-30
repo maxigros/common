@@ -39,13 +39,35 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
 
     switch (key) {
     case KEY_STATUS:{
-        ui->label_status_1->setText(QString::number((int)(data[1] & 0b00000001) >> 0));
-        ui->label_status_2->setText(QString::number((int)(data[1] & 0b00000010) >> 1));
-        ui->label_status_3->setText(QString::number((int)(data[1] & 0b00000100) >> 2));
-        ui->label_status_4->setText(QString::number((int)(data[1] & 0b00001000) >> 3));
-        ui->label_status_5->setText(QString::number((int)(data[1] & 0b00010000) >> 4));
-        ui->label_status_6->setText(QString::number((int)(data[1] & 0b00100000) >> 5));
-        ui->label_status_7->setText(QString::number((int)(data[1] & 0b01000000) >> 6));
+        if ((int)(data[1] & 0b00000001) >> 0)
+            ui->label_stat_1->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_1->setStyleSheet("QLabel {background-color : red}");
+        if ((int)(data[1] & 0b00000010) >> 1)
+            ui->label_stat_2->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_2->setStyleSheet("QLabel {background-color : red}");
+        if ((int)(data[1] & 0b00000100) >> 2)
+            ui->label_stat_3->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_3->setStyleSheet("QLabel {background-color : red}");
+        if ((int)(data[1] & 0b00001000) >> 3)
+            ui->label_stat_4->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_4->setStyleSheet("QLabel {background-color : red}");
+        if ((int)(data[1] & 0b00010000) >> 4)
+            ui->label_stat_5->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_5->setStyleSheet("QLabel {background-color : red}");
+        if ((int)(data[1] & 0b00100000) >> 5)
+            ui->label_stat_6->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_6->setStyleSheet("QLabel {background-color : red}");
+        if ((int)(data[1] & 0b01000000) >> 6)
+            ui->label_stat_7->setStyleSheet("QLabel {background-color : green}");
+        else
+            ui->label_stat_7->setStyleSheet("QLabel {background-color : red}");
+
         break;
     }
     case KEY_SESSION_SIZE:{
@@ -197,6 +219,7 @@ void MainWindow::mode_handler(int new_mode)
         ui->groupBox_sessions_rec->setEnabled(false);
         ui->groupBox_session_download->setEnabled(false);
         ui->groupBox_flash_download->setEnabled(false);
+        ui->progressBar_flash_download->setEnabled(true);
         ui->statusBar->showMessage("Flash Download Active!", 0);
 
         task = new mode_task;
