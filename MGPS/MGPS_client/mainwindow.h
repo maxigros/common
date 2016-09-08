@@ -76,6 +76,8 @@ private slots:
 
     void on_comboBox_flash_download_currentIndexChanged(int index);
 
+    void on_checkBox_sessions_rec_contents_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     llmdb_client_ext* client;
@@ -84,6 +86,7 @@ private:
     QTextStream general_log_stream;
     QFile session_download_log;
     QFile flash_download_log;
+    QString log_path;
 
 signals:
     void mode_changed(int new_mode);

@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     client->set_hostAddress(ui->host_addr_line->text());
     connect(client, SIGNAL(response(int, QString, char*, int)), this, SLOT(receive_data_from_client(int, QString, char*, int)));
     connect(this, SIGNAL(mode_changed(int)), this, SLOT(mode_handler(int)));
-
+    log_path = QString("%1/Documents/MGPS_logs").arg(QDir::homePath());
 }
 
 MainWindow::~MainWindow()
@@ -40,33 +40,33 @@ void MainWindow::receive_data_from_client(int key, QString msg, char *data, int 
     switch (key) {
     case KEY_STATUS:{
         if ((int)(data[1] & 0b00000001) >> 0)
-            ui->label_stat_1->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_1->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_1->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_1->setStyleSheet("background-color : #f66");
         if ((int)(data[1] & 0b00000010) >> 1)
-            ui->label_stat_2->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_2->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_2->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_2->setStyleSheet("background-color : #f66");
         if ((int)(data[1] & 0b00000100) >> 2)
-            ui->label_stat_3->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_3->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_3->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_3->setStyleSheet("background-color : #f66");
         if ((int)(data[1] & 0b00001000) >> 3)
-            ui->label_stat_4->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_4->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_4->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_4->setStyleSheet("background-color : #f66");
         if ((int)(data[1] & 0b00010000) >> 4)
-            ui->label_stat_5->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_5->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_5->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_5->setStyleSheet("background-color : #f66");
         if ((int)(data[1] & 0b00100000) >> 5)
-            ui->label_stat_6->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_6->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_6->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_6->setStyleSheet("background-color : #f66");
         if ((int)(data[1] & 0b01000000) >> 6)
-            ui->label_stat_7->setStyleSheet("QLabel {background-color : green}");
+            ui->label_stat_7->setStyleSheet("background-color : #6f6");
         else
-            ui->label_stat_7->setStyleSheet("QLabel {background-color : red}");
+            ui->label_stat_7->setStyleSheet("background-color : #f66");
 
         break;
     }
@@ -178,6 +178,11 @@ void MainWindow::mode_handler(int new_mode)
             task->data[5] = 1;
         else
             task->data[5] = 0;
+        // Ask free space after each session
+        if (ui->checkBox_sessions_rec_free_space->isChecked())
+            task->data[6] = 1;
+        else
+            task->data[6] = 0;
 
         client->initiate_mode(task);
         delete task;
@@ -194,17 +199,20 @@ void MainWindow::mode_handler(int new_mode)
         task->dev_addr = ui->device_addr_line->text().toInt();
         task->str = ui->lineEdit_session_download_name->text();
 
-        if (!QDir("../MGPS_logs").exists())
-            QDir().mkdir("../MGPS_logs");
+        if (!QDir(log_path).exists())
+            QDir().mkdir(log_path);
 
-        if (!QDir(QString("../MGPS_logs/%1")
+        if (!QDir(QString("%1/%2")
+                  .arg(log_path)
                   .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))).exists())
         {
-            QDir().mkdir(QString("../MGPS_logs/%1")
+            QDir().mkdir(QString("%1/%2")
+                         .arg(log_path)
                          .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy")));
         }
 
-        session_download_log.setFileName(QString("../MGPS_logs/%1/session(%2)_log(%3).log")
+        session_download_log.setFileName(QString("%1/%2/session(%3)_log(%4).log")
+                                         .arg(log_path)
                                          .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
                                          .arg(task->str)
                                          .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
@@ -218,7 +226,10 @@ void MainWindow::mode_handler(int new_mode)
     case MODE_FLASH_DOWNLOAD:{
         ui->groupBox_sessions_rec->setEnabled(false);
         ui->groupBox_session_download->setEnabled(false);
-        ui->groupBox_flash_download->setEnabled(false);
+//        ui->groupBox_flash_download->setEnabled(false);
+        ui->button_flash_download_start->setEnabled(false);
+        ui->lineEdit_flash_download_blocks_num->setEnabled(false);
+        ui->comboBox_flash_download->setEnabled(false);
         ui->progressBar_flash_download->setEnabled(true);
         ui->statusBar->showMessage("Flash Download Active!", 0);
 
@@ -228,26 +239,31 @@ void MainWindow::mode_handler(int new_mode)
         task->data[0] = ui->comboBox_flash_download->currentIndex();
         task->data[1] = ui->lineEdit_flash_download_blocks_num->text().toInt();
 
-        if (!QDir("../MGPS_logs").exists())
-            QDir().mkdir("../MGPS_logs");
+        if (!QDir(log_path).exists())
+            QDir().mkdir(log_path);
 
-        if (!QDir(QString("../MGPS_logs/%1")
+        if (!QDir(QString("%1/%2")
+                  .arg(log_path)
                   .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))).exists())
         {
-            QDir().mkdir(QString("../MGPS_logs/%1")
+            QDir().mkdir(QString("%1/%2")
+                         .arg(log_path)
                          .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy")));
         }
 
+
         if (!task->data[0])
         {
-            flash_download_log.setFileName(QString("../MGPS_logs/%1/flash_first(%2)_log(%3).log")
+            flash_download_log.setFileName(QString("%1/%2/flash_first(%3)_log(%4).log")
+                                           .arg(log_path)
                                            .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
                                            .arg(task->data[1])
                                            .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
         }
         else
         {
-            flash_download_log.setFileName(QString("../MGPS_logs/%1/flash_full_log(%2).log")
+            flash_download_log.setFileName(QString("%1/%2/flash_full_log(%3).log")
+                                           .arg(log_path)
                                            .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
                                            .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
         }
@@ -262,6 +278,9 @@ void MainWindow::mode_handler(int new_mode)
         ui->groupBox_sessions_rec->setEnabled(true);
         ui->groupBox_session_download->setEnabled(true);
         ui->groupBox_flash_download->setEnabled(true);
+        ui->button_flash_download_start->setEnabled(true);
+        ui->lineEdit_flash_download_blocks_num->setEnabled(true);
+        ui->comboBox_flash_download->setEnabled(true);
         ui->statusBar->clearMessage();
 
         if (session_download_log.isOpen())
@@ -486,17 +505,20 @@ void MainWindow::on_checkBox_general_log_stateChanged(int arg1)
 {
     if (arg1)
     {
-        if (!QDir("../MGPS_logs").exists())
-            QDir().mkdir("../MGPS_logs");
+        if (!QDir(log_path).exists())
+            QDir().mkdir(log_path);
 
-        if (!QDir(QString("../MGPS_logs/%1")
+        if (!QDir(QString("%1/%2")
+                  .arg(log_path)
                   .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))).exists())
         {
-            QDir().mkdir(QString("../MGPS_logs/%1")
+            QDir().mkdir(QString("%1/%2")
+                         .arg(log_path)
                          .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy")));
         }
 
-        general_log.setFileName(QString("../MGPS_logs/%1/general_log(%2).txt")
+        general_log.setFileName(QString("%1/%2/general_log(%3).txt")
+                                .arg(log_path)
                                        .arg(QDateTime::currentDateTime().toString("dd.MM.yyyy"))
                                        .arg(QDateTime::currentDateTime().toString("dd.MM_hh:mm:ss")));
 
@@ -515,4 +537,18 @@ void MainWindow::on_comboBox_flash_download_currentIndexChanged(int index)
         ui->lineEdit_flash_download_blocks_num->setEnabled(true);
     else
         ui->lineEdit_flash_download_blocks_num->setEnabled(false);
+}
+
+void MainWindow::on_checkBox_sessions_rec_contents_stateChanged(int arg1)
+{
+    if (!arg1)
+    {
+        ui->checkBox_sessions_rec_free_space->setChecked(false);
+        ui->checkBox_sessions_rec_free_space->setEnabled(false);
+    }
+    else
+    {
+        ui->checkBox_sessions_rec_free_space->setEnabled(true);
+        ui->checkBox_sessions_rec_free_space->setChecked(true);
+    }
 }

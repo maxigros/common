@@ -55,6 +55,7 @@ private:
     int sessions_rec_duration;
     bool sessions_rec_duration_random;
     int sessions_rec_contents_check_mode;
+    int sessions_rec_free_space_requset_mode;
     bool session_rec_in_progress = false;
     bool check_contents(char *data);
     int sessions_rec_contents_counter;

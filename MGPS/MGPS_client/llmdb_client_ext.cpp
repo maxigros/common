@@ -202,6 +202,8 @@ void llmdb_client_ext::onSocketDataReady()
 
                         key = KEY_FLASH_CONTENTS_ERROR;
                         emit response(key, NULL, NULL, 0);
+                        delete [] buf;
+                        buf = NULL;
                         return;
                     }
 #endif
@@ -213,6 +215,8 @@ void llmdb_client_ext::onSocketDataReady()
                         next_message->num = sessions_rec_contents_counter;
                         cmd_handler(next_message);
                         timer_repeat.start(LLMDB_TIMEOUT);
+                        delete [] buf;
+                        buf = NULL;
                         return;
                     }
 #endif
@@ -223,8 +227,34 @@ void llmdb_client_ext::onSocketDataReady()
                         key = KEY_AUTO_MODE_OFF;
                         session_rec_in_progress = false;
                         emit response(key, NULL, NULL, 0);
+                        delete [] buf;
+                        buf = NULL;
                         return;
                     }
+
+                    // no free space request
+                    if (!sessions_rec_free_space_requset_mode)
+                        {
+                        unsigned char temp1 = (sessions_rec_counter >> 8) & 0xFF;
+                        unsigned char temp2 = sessions_rec_counter & 0xFF;
+                        next_message->str = QString("%1 %2")
+                                                        .arg(temp1)
+                                                        .arg(temp2);
+                        next_message->cmd = CMD_START_SESSION;
+                        cmd_handler(next_message);
+                        timer_repeat.start(LLMDB_TIMEOUT);
+                    }
+                    else
+                    {
+                        next_message->cmd = CMD_FLASH_FREE_SPACE;
+                        cmd_handler(next_message);
+                        timer_repeat.start(LLMDB_TIMEOUT);
+                    }
+                }
+                case ((((CMD_FLASH_FREE_SPACE >> 3) + CMD_FLASH_FREE_SPACE) & 0x0F) | (0x03 << 4)):
+                    // may occur only if free space request is on
+                {
+                    timer_repeat.stop();
                     unsigned char temp1 = (sessions_rec_counter >> 8) & 0xFF;
                     unsigned char temp2 = sessions_rec_counter & 0xFF;
                     next_message->str = QString("%1 %2")
@@ -233,6 +263,7 @@ void llmdb_client_ext::onSocketDataReady()
                     next_message->cmd = CMD_START_SESSION;
                     cmd_handler(next_message);
                     timer_repeat.start(LLMDB_TIMEOUT);
+                    break;
                 }
                 default:
                     break;
@@ -261,6 +292,8 @@ void llmdb_client_ext::onSocketDataReady()
                     {
                         key = KEY_AUTO_MODE_OFF;
                         emit response(key, NULL, NULL, 0);
+                        delete [] buf;
+                        buf = NULL;
                         return;
                     }
                     next_message->num = session_download_block_counter;
@@ -285,6 +318,8 @@ void llmdb_client_ext::onSocketDataReady()
                     {
                         key = KEY_AUTO_MODE_OFF;
                         emit response(key, NULL, NULL, 0);
+                        delete [] buf;
+                        buf = NULL;
                         return;
                     }
                     next_message->num = flash_download_block_counter;
@@ -328,6 +363,7 @@ void llmdb_client_ext::start_sessions_rec(int *data)
         timer_flash_status.start(data[4] * 1000);
 
     sessions_rec_contents_check_mode = data[5];
+    sessions_rec_free_space_requset_mode = data[6];
 
     next_message->cmd = CMD_BINR_START;
     cmd_handler(next_message);
@@ -384,6 +420,7 @@ void llmdb_client_ext::timer_session_rec_duration_timeout()
 {
     cmd_handler(next_message);
     timer_session_rec_duration.stop();
+    timer_repeat.start(LLMDB_TIMEOUT);
 }
 
 void llmdb_client_ext::timer_flash_status_timeout()

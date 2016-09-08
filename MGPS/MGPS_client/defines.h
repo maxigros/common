@@ -68,7 +68,7 @@ typedef struct
 {
     int mode = 0;
     unsigned char dev_addr = 0;
-    int data[6];
+    int data[7];
     QString str = 0;
 } mode_task;
 
