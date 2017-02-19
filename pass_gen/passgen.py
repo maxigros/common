@@ -41,4 +41,5 @@ def generate_password(size):
     password_str = "".join(password)
     return password_str
 
-main()
+if __name__ == "__main__":
+    main()
